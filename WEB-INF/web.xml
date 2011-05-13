@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <display-name>testMVC</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <description>Home banking servlet</description>
+    <display-name>BankingServlet</display-name>
+    <servlet-name>BankingServlet</servlet-name>
+    <servlet-class>application.BankingServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BankingServlet</servlet-name>
+    <url-pattern>/banking</url-pattern>
+    <url-pattern>/banking/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <description>Cash dispensing servlet</description>
+    <display-name>AtmServlet</display-name>
+    <servlet-name>AtmServlet</servlet-name>
+    <servlet-class>application.AtmServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AtmServlet</servlet-name>
+    <url-pattern>/atm</url-pattern>
+    <url-pattern>/atm/*</url-pattern>
+  </servlet-mapping>
+</web-app>

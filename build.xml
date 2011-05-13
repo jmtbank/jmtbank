@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<project name="Java Servlet" default="war" basedir=".">
+	<description>
+	    Ant build file to build and deploy a Java Servlet.
+	</description>
+	
+	<!-- set global properties for this build in a separate file -->
+	<property file="build.properties" />
+	
+	<!-- define the classpaths for compilation -->
+	
+	<path id="tomcat.classpath">
+		<fileset dir="${tomcat.lib.dir}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	
+	<path id="local.lib.classpath">
+		<fileset dir="${local.lib.dir}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<!-- target init: creates necessary directories -->
+	<target name="init">
+		<mkdir dir="${build.classes.dir}"/>
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${local.lib.dir}"/>
+		<mkdir dir="${web.dir}"/>
+	</target>	
+		
+	<!-- target clean: remove all generated classes and files -->
+	<target name="clean">
+		<delete includeemptydirs="true">
+			<fileset dir="${build.classes.dir}" includes="**/*" />
+		</delete>
+		<delete file="${dist}/**/*" />
+	</target>
+
+	<!-- target compile: compile everything is the source directory -->
+	<target name="compile" depends="init">
+		<javac destdir="${build.classes.dir}"
+			includeAntRuntime="false" srcdir="${sources.dir}">
+		<classpath refid="tomcat.classpath"/>
+		<classpath refid="local.lib.classpath"/>
+		</javac>
+	</target>
+	
+	<!-- target war: creates the WAR file ready for deployment  -->
+	<target name="war" depends="compile" description="creates a WAR file">
+		 <war destfile="${dist.dir}/${target.war}" duplicate="fail"
+ 		     webxml="${webxml.file}">
+	    	<fileset dir="${web.dir}"/>
+	    	<classes dir="${build.classes.dir}"/>
+	    	<lib dir="${local.lib.dir}">
+	    		<include name="*.jar" />
+	    	</lib>
+	  	</war>
+	 </target>
+
+	<!-- target deploy: deploys the application in Tomcat  -->
+	<target name="deploy" depends="war">
+		<echo>
+ Deploying ${dist.dir}/${target.war} to ${deploy.destfile}
+ URL: ${application.url}
+		</echo>
+		<copy file="${dist.dir}/${target.war}"
+			tofile="${deploy.destfile}"
+			overwrite="true"/>
+	</target>
+
+</project>
