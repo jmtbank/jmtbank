@@ -1,2 +1,4 @@
 # Negeer lokale wijzigingen in build.properties
 build.properties
+# dit werkt niet
+# wat je moet doen is: git update-index --assume-unchanged build.properties
