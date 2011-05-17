@@ -15,16 +15,20 @@ import presentation.Balances;
 import banking.AuthenticatedClient;
 import banking.Authentication;
 import banking.AuthenticationException;
+import banking.AuthenticationMethod;
 import banking.Client;
 import banking.MockAuthenticator;
 import banking.Transaction;
 import banking.TransactionException;
 import banking.TransactorFactory;
+import banking.AtmLimit;
 
 public class AtmServlet extends HttpServlet {
 
 	private Authentication auth;
 	private AuthenticatedClient authClient;
+	private final float MAX_DEPOSIT = 1000;
+	private final float MAX_WITHDRAW = 500;
 	
 	public AtmServlet() {
 		auth = new MockAuthenticator();
@@ -37,12 +41,13 @@ public class AtmServlet extends HttpServlet {
 				session.setMaxInactiveInterval(60);
 			}
 			authClient = (AuthenticatedClient) session.getAttribute("authClient");
-			if(authClient == null /* || authClient.getMethod() != CARD */) {
+			if(authClient == null || authClient.getMethod() != AuthenticationMethod.CARD) {
 				String cardId = request.getParameter("cardId");
 				String pin = request.getParameter("pin");
 				try {
 					authClient = auth.authenticateCard(cardId, pin);
 					session.setAttribute("authClient", authClient);
+					session.setAttribute("atmLimit", new AtmLimit());
 					handleRequest(request, response);
 				}
 				catch(AuthenticationException authex) {
@@ -76,6 +81,7 @@ public class AtmServlet extends HttpServlet {
 					accountIds = c.getAccounts();
 				}
 			}
+			AtmLimit lim = (AtmLimit) request.getSession().getAttribute("atmLimit");
 
 			if("/checkbalance".equals(path)) {
 				address = "/WEB-INF/banking/Checkbalance.jsp";
@@ -97,8 +103,19 @@ public class AtmServlet extends HttpServlet {
 				String message = null;
 				if(account != null && amountStr != null) {
 					try {
-						float amount = Float.parseFloat(amountStr);
-						message = trans.withdraw(account, amount);
+						if(lim.getWithdraw() < MAX_WITHDRAW) { 
+							float amount = Float.parseFloat(amountStr);
+							if(!((lim.getWithdraw() + amount) > MAX_WITHDRAW)) {
+								message = trans.withdraw(account, amount);
+								lim.addWithdraw(amount);
+								request.getSession().setAttribute("atmLimit", lim);
+							}
+							else {
+								message = "This withdrawal would exceed the maximum alotted withdrawal amount of this session";
+							}
+						} else {
+							message = "Already at maximum alotted withdrawal amount of this session";
+						}
 					} catch (NumberFormatException e) {
 						error = "Amount \"" + amountStr + "\"not a valid float";
 					} catch (TransactionException e) {
@@ -122,8 +139,19 @@ public class AtmServlet extends HttpServlet {
 				String message = null;
 				if(account != null && amountStr != null) {
 					try {
-						float amount = Float.parseFloat(amountStr);
-						message = trans.deposit(account, amount);
+						if(lim.getDeposit() < MAX_DEPOSIT) { 
+							float amount = Float.parseFloat(amountStr);
+							if(!((lim.getDeposit() + amount) > MAX_DEPOSIT)) {
+								message = trans.deposit(account, amount);
+								lim.addDeposit(amount);
+								request.getSession().setAttribute("atmLimit", lim);
+							}
+							else {
+								message = "This deposit would exceed the maximum alotted deposit amount of this session";
+							}
+						} else {
+							message = "Already at maximum alotted deposit amount of this session";
+						}
 					} catch (NumberFormatException e) {
 						error = "Amount \"" + amountStr + "\"not a valid float";
 					} catch (TransactionException e) {

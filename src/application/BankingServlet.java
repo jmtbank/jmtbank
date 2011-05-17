@@ -11,9 +11,10 @@ import presentation.*;
 public class BankingServlet extends HttpServlet {
 	private Authentication auth;
 	private AuthenticatedClient authClient;
+	private final float MAX_TRANSFER = 5000;
 	
 	public BankingServlet() {
-		super();
+		//super();
 		auth = new MockAuthenticator();
 	}
 	
@@ -24,12 +25,13 @@ public class BankingServlet extends HttpServlet {
 				session.setMaxInactiveInterval(60);
 			}
 			authClient = (AuthenticatedClient) session.getAttribute("authClient");
-			if(authClient == null /* || authClient.getMethod() != USERNAME */) {
+			if(authClient == null || authClient.getMethod() != AuthenticationMethod.USERNAME) {
 				String userid = request.getParameter("username");
 				String password = request.getParameter("password");
 					try {
 						authClient = auth.authenticateClient(userid, password);
 						session.setAttribute("authClient", authClient);
+						session.setAttribute("transferred", new Float(0));
 						handleRequest(request, response);
 					}
 					catch(AuthenticationException authex) {
@@ -91,15 +93,22 @@ public class BankingServlet extends HttpServlet {
 				String amount = request.getParameter("transferamount");
 				if(debAccountId != null && crdAccountId != null && amount != null) {
 					String reply;
+					float currtransfer = ((Float) request.getSession().getAttribute("transferred")).floatValue();
 					try {
-						reply = trans.transfer(debAccountId, crdAccountId, Float.parseFloat(amount));
+						if(currtransfer < MAX_TRANSFER) {
+							if(!((Float.parseFloat(amount) + currtransfer) > MAX_TRANSFER)) {
+								reply = trans.transfer(debAccountId, crdAccountId, Float.parseFloat(amount));
+								currtransfer = currtransfer + Float.parseFloat(amount);
+								request.getSession().setAttribute("transferred", new Float(currtransfer));
+							}
+							else { reply = "This transfer would exceed the maximum alotted transfer amount per session"; }
+						}
+						else { reply = "Already at maximum alotted transfer amount for this session"; }
 					} catch(TransactionException tranex) { reply = tranex.getMessage(); }
 					request.setAttribute("transresult", reply);
 				}
 			} else if("/logout".equals(path)) {
-				//HttpSession session = request.getSession();
 				request.getSession().invalidate();
-				//session.removeAttribute("authClient");
 				request.setAttribute("authMsg", new AuthenticationMessage("Logout successful"));
 				address = "";
 			} else {

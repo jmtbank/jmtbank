@@ -30,9 +30,10 @@ public class TransactorFactory {
 				float amount) throws TransactionException {
 			if(amount <= 0) throw new TransactionException("You can only transfer amounts larger than 0");
 			Account debtAcc = Account.getAccount(debtAccountId);
-			if(debtAcc == null) throw new TransactionException("unknown debit account:" + debtAccountId);
+			if(debtAcc == null) throw new TransactionException("Unknown debit account: " + debtAccountId);
+			if(debtAcc.getBalance() < amount) throw new TransactionException("Insufficient funds on: " + debtAccountId);
 			Account creditAcc = Account.getAccount(creditAccountId);
-			if(creditAcc == null) throw new TransactionException("unknown credit account:" + creditAccountId);
+			if(creditAcc == null) throw new TransactionException("Unknown credit account: " + creditAccountId);
 			return "Transferred " + amount + " from " + debtAccountId + " to " + creditAccountId;
 		}
 	
@@ -41,7 +42,8 @@ public class TransactorFactory {
 				throws TransactionException {
 			if(amount <= 0) throw new TransactionException("You can only withdraw amounts larger than 0");
 			Account debtAcc = Account.getAccount(debtAccountId);
-			if(debtAcc == null) throw new TransactionException("unknown debit account:" + debtAccountId);
+			if(debtAcc == null) throw new TransactionException("unknown debit account: " + debtAccountId);
+			if(debtAcc.getBalance() < amount) throw new TransactionException("Insufficient funds on: " + debtAccountId);
 			return "Withdrew  " + amount + " from " + debtAccountId;
 		}
 	
