@@ -10,13 +10,11 @@ import presentation.*;
 
 public class BankingServlet extends HttpServlet {
 	private Authentication auth;
-	private Transaction trans;
 	private AuthenticatedClient authClient;
 	
 	public BankingServlet() {
 		super();
 		auth = new MockAuthenticator();
-		trans = new MockTransactor();
 	}
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -63,6 +61,8 @@ public class BankingServlet extends HttpServlet {
 	
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
+			Transaction trans = TransactorFactory.getTransaction(authClient);
+
 			String address;
 			String clientId = authClient.getClientId();
 			String path = request.getPathInfo();
