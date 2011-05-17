@@ -2,7 +2,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-<TITLE>Withdraw money</TITLE>
+<TITLE>Deposit money</TITLE>
 </HEAD>
 <BODY>
 <%
@@ -20,6 +20,6 @@
 %>
 </select>
 Amount: <input type="text" name="amount"><br />
-<input type="submit" value="Withdraw">
+<input type="submit" value="Deposit">
 </form>
 </BODY></HTML>

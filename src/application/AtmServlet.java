@@ -17,6 +17,9 @@ import banking.Authentication;
 import banking.AuthenticationException;
 import banking.Client;
 import banking.MockAuthenticator;
+import banking.Transaction;
+import banking.TransactionException;
+import banking.TransactorFactory;
 
 public class AtmServlet extends HttpServlet {
 
@@ -83,13 +86,59 @@ public class AtmServlet extends HttpServlet {
 			} else if ("/withdraw".equals(path)) {
 				address = "/WEB-INF/atm/Withdraw.jsp";
 				request.setAttribute("accountIds",accountIds);
+				String account = request.getParameter("account");
+				String amountStr = request.getParameter("amount");
+				String error = null;
+				String message = null;
+				if(account != null && amountStr != null) {
+					try {
+						float amount = Float.parseFloat(amountStr);
+						Transaction trans = TransactorFactory.getTransaction(authClient);
+						message = trans.withdraw(account, amount);
+					} catch (NumberFormatException e) {
+						error = "Amount \"" + amountStr + "\"not a valid float";
+					} catch (TransactionException e) {
+						error = e.getMessage();
+					}
+					if(error != null) {
+						request.setAttribute("error", error);
+					} else {
+						if(message != null) {
+							request.setAttribute("message", message);
+						}
+						address = "/WEB-INF/atm/WithdrawDone.jsp";
+					}
+				}
 			} else if ("/deposit".equals(path)) {
 				address = "/WEB-INF/atm/Deposit.jsp";					
 				request.setAttribute("accountIds",accountIds);
+				String account = request.getParameter("account");
+				String amountStr = request.getParameter("amount");
+				String error = null;
+				String message = null;
+				if(account != null && amountStr != null) {
+					try {
+						float amount = Float.parseFloat(amountStr);
+						Transaction trans = TransactorFactory.getTransaction(authClient);
+						message = trans.deposit(account, amount);
+					} catch (NumberFormatException e) {
+						error = "Amount \"" + amountStr + "\"not a valid float";
+					} catch (TransactionException e) {
+						error = e.getMessage();
+					}
+					if(error != null) {
+						request.setAttribute("error", error);
+					} else {
+						if(message != null) {
+							request.setAttribute("message", message);
+						}
+						address = "/WEB-INF/atm/DepositDone.jsp";
+					}
+				}
 			} else if("/logout".equals(path)) {
 				session.removeAttribute("authClient");
-				address = "";
-				response.sendRedirect("/");
+				address = "/";
+				//response.sendRedirect("/");
 			} else {
 				address = "/WEB-INF/atm/Menu.jsp";
 			}
