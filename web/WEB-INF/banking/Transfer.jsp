@@ -7,11 +7,12 @@
 
 Transfer: <br />
 <form method="post">
-<input type="text" name="debAccountId"><br />
-<input type="text" name="crdAccountId"><br />
-<input type="text" name="transferamount"><br />
+From account: <input type="text" name="debAccountId" value="ac1"><br />
+To account: <input type="text" name="crdAccountId" value="ac2"><br />
+Amount: <input type="text" name="transferamount"><br />
 <input type="submit" value="transfer">
 </form><br />
+Back to <a href="./">menu</a><br />
 <% String s = (String) request.getAttribute("transresult"); if(s != null) { out.println(s); } %>
 
 </BODY></HTML>

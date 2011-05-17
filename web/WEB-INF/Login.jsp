@@ -7,12 +7,12 @@
 <jsp:useBean id="authMsg"
 type="application.AuthenticationMessage"
 scope="request" />
-message: <jsp:getProperty name="authMsg" property="message" /> <br />
+<jsp:getProperty name="authMsg" property="message" /> <br />
 
-Please login: <br />
 <form method="post">
 Username: <input type="text" name="username"><br />
 Password: <input type="password" name="password"><br />
 <input type="submit" value="Login">
 </form>
+Back to <a href="../">menu</a>
 </BODY></HTML>
