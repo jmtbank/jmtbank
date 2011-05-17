@@ -23,10 +23,8 @@ import banking.TransactionException;
 import banking.TransactorFactory;
 import banking.AtmLimit;
 
-public class AtmServlet extends HttpServlet {
+public class AtmServlet extends LoggedInServlet {
 
-	private Authentication auth;
-	private AuthenticatedClient authClient;
 	private final float MAX_DEPOSIT = 1000;
 	private final float MAX_WITHDRAW = 500;
 	
@@ -34,42 +32,9 @@ public class AtmServlet extends HttpServlet {
 		auth = new MockAuthenticator();
 	}
 	
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
-			HttpSession session = request.getSession();
-			if(session.isNew()) {
-				session.setMaxInactiveInterval(60);
-			}
-			authClient = (AuthenticatedClient) session.getAttribute("authClient");
-			if(authClient == null || authClient.getMethod() != AuthenticationMethod.CARD) {
-				String cardId = request.getParameter("cardId");
-				String pin = request.getParameter("pin");
-				try {
-					authClient = auth.authenticateCard(cardId, pin);
-					session.setAttribute("authClient", authClient);
-					session.setAttribute("atmLimit", new AtmLimit());
-					handleRequest(request, response);
-				}
-				catch(AuthenticationException authex) {
-					//return to login, error
-					AuthenticationMessage msg = new AuthenticationMessage(authex);
-					String address = "/WEB-INF/LoginCard.jsp";
-					request.setAttribute("authMsg", msg);
-					RequestDispatcher dispatcher = request.getRequestDispatcher(address);
-					dispatcher.forward(request, response);					
-				}
-			} else {
-				handleRequest(request, response);
-			}
-	}
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
-			doGet(request, response);
-	}
 	
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
-			HttpSession session = request.getSession();
 
 			Transaction trans = TransactorFactory.getTransaction(authClient);
 			String address;
@@ -176,4 +141,19 @@ public class AtmServlet extends HttpServlet {
 			RequestDispatcher dispatcher = request.getRequestDispatcher(address);
 			dispatcher.forward(request, response);
 	}
+	@Override
+	protected AuthenticatedClient authenticate(String identifier, String secret)
+			throws AuthenticationException {
+		session.setAttribute("atmLimit", new AtmLimit());
+		return auth.authenticateCard(identifier, secret);
+	}
+	@Override
+	protected String getLoginPagePath() {
+		return "/WEB-INF/LoginCard.jsp";
+	}
+	@Override
+	protected boolean isAllowedAuth(AuthenticatedClient authcl) {
+		return authcl.getMethod() == AuthenticationMethod.CARD;
+	}
+
 }

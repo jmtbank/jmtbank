@@ -8,59 +8,9 @@ import javax.servlet.http.*;
 import banking.*;
 import presentation.*;
 
-public class BankingServlet extends HttpServlet {
-	private Authentication auth;
-	private AuthenticatedClient authClient;
+public class BankingServlet extends LoggedInServlet {
 	private final float MAX_TRANSFER = 5000;
-	
-	public BankingServlet() {
-		//super();
-		auth = new MockAuthenticator();
-	}
-	
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
-			HttpSession session = request.getSession();
-			if(session.isNew()) {
-				session.setMaxInactiveInterval(60);
-			}
-			authClient = (AuthenticatedClient) session.getAttribute("authClient");
-			if(authClient == null || authClient.getMethod() != AuthenticationMethod.USERNAME) {
-				String userid = request.getParameter("username");
-				String password = request.getParameter("password");
-					try {
-						authClient = auth.authenticateClient(userid, password);
-						session.setAttribute("authClient", authClient);
-						session.setAttribute("transferred", new Float(0));
-						handleRequest(request, response);
-					}
-					catch(AuthenticationException authex) {
-					//return to login, error
-						AuthenticationMessage msg;
-						if(userid != null && password != null) {
-							msg = new AuthenticationMessage(authex);
-						} else {
-							if (request.getAttribute("authMsg") != null) {
-								msg = (AuthenticationMessage) request.getAttribute("authMsg");
-								}
-								else {
-								msg = new AuthenticationMessage("Please log in");
-								}
-						}
-						String address = "/WEB-INF/Login.jsp";
-						request.setAttribute("authMsg", msg);
-						RequestDispatcher dispatcher = request.getRequestDispatcher(address);
-						dispatcher.forward(request, response);					
-					}
-			} else {
-				handleRequest(request, response);
-			}
-	}
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException {
-			doGet(request, response);
-	}
-	
+
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
 			Transaction trans = TransactorFactory.getTransaction(authClient);
@@ -105,6 +55,9 @@ public class BankingServlet extends HttpServlet {
 						}
 						else { reply = "Already at maximum alotted transfer amount for this session"; }
 					} catch(TransactionException tranex) { reply = tranex.getMessage(); }
+					catch(NumberFormatException e) {
+						reply = "Amount is not a valid number";
+					}
 					request.setAttribute("transresult", reply);
 				}
 			} else if("/logout".equals(path)) {
@@ -116,5 +69,22 @@ public class BankingServlet extends HttpServlet {
 			}
 			RequestDispatcher dispatcher = request.getRequestDispatcher(address);
 			dispatcher.forward(request, response);
+	}
+
+	@Override
+	protected AuthenticatedClient authenticate(String identifier, String secret)
+			throws AuthenticationException {
+		session.setAttribute("transferred", new Float(0));
+		return auth.authenticateClient(identifier, secret);
+	}
+
+	@Override
+	protected String getLoginPagePath() {
+		return "/WEB-INF/Login.jsp";
+	}
+
+	@Override
+	protected boolean isAllowedAuth(AuthenticatedClient authcl) {
+		return authcl.getMethod() == AuthenticationMethod.USERNAME;
 	}
 }

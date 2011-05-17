@@ -10,8 +10,8 @@ scope="request" />
 <jsp:getProperty name="authMsg" property="message" /> <br />
 
 <form method="post">
-Username: <input type="text" name="username"><br />
-Password: <input type="password" name="password"><br />
+Username: <input type="text" name="identifier"><br />
+Password: <input type="password" name="secret"><br />
 <input type="submit" value="Login">
 </form>
 Back to <a href="../">menu</a>

@@ -11,8 +11,8 @@ message: <jsp:getProperty name="authMsg" property="message" /> <br />
 
 Please login: <br />
 <form method="post">
-CardId: <input type="text" name="cardId"><br />
-Pin: <input type="password" name="pin"><br />
+CardId: <input type="text" name="identifier"><br />
+Pin: <input type="password" name="secret"><br />
 <input type="submit" value="Login">
 </form>
 </BODY></HTML>
