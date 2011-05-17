@@ -66,6 +66,7 @@ public class AtmServlet extends HttpServlet {
 		throws ServletException, IOException {
 			HttpSession session = request.getSession();
 
+			Transaction trans = TransactorFactory.getTransaction(authClient);
 			String address;
 			String clientId = authClient.getClientId();
 			String path = request.getPathInfo();
@@ -75,13 +76,17 @@ public class AtmServlet extends HttpServlet {
 					accountIds = c.getAccounts();
 				}
 			}
-			List<presentation.Account> accounts = new ArrayList<presentation.Account>();
-			for(String s : accountIds) {
-				accounts.add(banking.Account.getAccount(s));
-			}
-			Balances bean = new Balances(clientId, accounts);
+
 			if("/checkbalance".equals(path)) {
 				address = "/WEB-INF/banking/Checkbalance.jsp";
+				List<presentation.Account> accounts = new ArrayList<presentation.Account>();
+				for(String s : accountIds) {
+					try {
+						float balance = trans.getBalance(s);
+						accounts.add(new presentation.Account(s, balance));
+					} catch (TransactionException tranex) { }
+				}
+				Balances bean = new Balances(clientId, accounts);
 				request.setAttribute("balances", bean);
 			} else if ("/withdraw".equals(path)) {
 				address = "/WEB-INF/atm/Withdraw.jsp";
@@ -93,7 +98,6 @@ public class AtmServlet extends HttpServlet {
 				if(account != null && amountStr != null) {
 					try {
 						float amount = Float.parseFloat(amountStr);
-						Transaction trans = TransactorFactory.getTransaction(authClient);
 						message = trans.withdraw(account, amount);
 					} catch (NumberFormatException e) {
 						error = "Amount \"" + amountStr + "\"not a valid float";
@@ -119,7 +123,6 @@ public class AtmServlet extends HttpServlet {
 				if(account != null && amountStr != null) {
 					try {
 						float amount = Float.parseFloat(amountStr);
-						Transaction trans = TransactorFactory.getTransaction(authClient);
 						message = trans.deposit(account, amount);
 					} catch (NumberFormatException e) {
 						error = "Amount \"" + amountStr + "\"not a valid float";
