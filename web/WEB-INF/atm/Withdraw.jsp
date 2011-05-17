@@ -22,4 +22,6 @@
 Amount: <input type="text" name="amount"><br />
 <input type="submit" value="Withdraw">
 </form>
+<br />
+Back to <a href="./">menu</a><br />
 </BODY></HTML>

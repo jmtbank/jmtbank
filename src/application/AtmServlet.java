@@ -82,7 +82,7 @@ public class AtmServlet extends LoggedInServlet {
 							message = "Already at maximum alotted withdrawal amount of this session";
 						}
 					} catch (NumberFormatException e) {
-						error = "Amount \"" + amountStr + "\"not a valid float";
+						error = "Amount \"" + amountStr + "\" not a valid float";
 					} catch (TransactionException e) {
 						error = e.getMessage();
 					}
@@ -118,7 +118,7 @@ public class AtmServlet extends LoggedInServlet {
 							message = "Already at maximum alotted deposit amount of this session";
 						}
 					} catch (NumberFormatException e) {
-						error = "Amount \"" + amountStr + "\"not a valid float";
+						error = "Amount \"" + amountStr + "\" not a valid float";
 					} catch (TransactionException e) {
 						error = e.getMessage();
 					}
