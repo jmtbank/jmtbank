@@ -9,8 +9,6 @@ package bank;
  * @version 1.0
  */
 
-import java.util.*;
-
 public class Client implements java.io.Serializable {
 
 	// constants

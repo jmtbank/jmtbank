@@ -1,4 +1,4 @@
-package presentation;
+package bank.application.presentation;
 
 import java.io.Serializable;
 import java.util.List;

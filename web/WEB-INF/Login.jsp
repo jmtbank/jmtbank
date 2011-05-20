@@ -5,7 +5,7 @@
 </HEAD>
 <BODY>
 <jsp:useBean id="authMsg"
-type="application.AuthenticationMessage"
+type="bank.application.AuthenticationMessage"
 scope="request" />
 <jsp:getProperty name="authMsg" property="message" /> <br />
 

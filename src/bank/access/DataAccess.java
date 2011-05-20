@@ -12,7 +12,6 @@ package bank.access;
  */
 
 import bank.*;
-import bank.banking.*;
 import java.rmi.*;
 
 public interface DataAccess extends Remote {

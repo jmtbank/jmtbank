@@ -1,4 +1,4 @@
-<%@ page import="presentation.Account" %>
+<%@ page import="bank.application.presentation.Account" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
@@ -6,7 +6,7 @@
 </HEAD>
 <BODY>
 <jsp:useBean id="balances"
-type="presentation.Balances"
+type="bank.application.presentation.Balances"
 scope="request" />
 
 Hello <jsp:getProperty name="balances" property="clientId" />, <br />

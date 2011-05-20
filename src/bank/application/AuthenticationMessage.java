@@ -1,8 +1,8 @@
-package application;
+package bank.application;
 
 import java.io.Serializable;
 
-import banking.AuthenticationException;
+import bank.authentication.AuthenticationException;
 
 
 public class AuthenticationMessage implements Serializable {

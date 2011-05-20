@@ -1,10 +1,9 @@
 package banking;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
 
-public class Account extends presentation.Account {
+public class Account extends bank.application.presentation.Account {
 	private static Map<String,Account> accounts;
 	static {
 		accounts = new HashMap<String,Account>();

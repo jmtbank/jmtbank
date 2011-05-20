@@ -1,4 +1,4 @@
-package application;
+package bank.application;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,21 +6,18 @@ import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import presentation.Balances;
+import bank.application.presentation.Balances;
 import banking.AuthenticatedClient;
-import banking.Authentication;
-import banking.AuthenticationException;
+import bank.authentication.AuthenticationException;
+import banking.MockAuthenticator;
 import banking.AuthenticationMethod;
 import banking.Client;
-import banking.MockAuthenticator;
-import banking.Transaction;
-import banking.TransactionException;
-import banking.TransactorFactory;
+import bank.banking.Transaction;
+import bank.banking.TransactionException;
+import bank.banking.TransactorFactory;
 import banking.AtmLimit;
 
 public class AtmServlet extends LoggedInServlet {
@@ -50,11 +47,11 @@ public class AtmServlet extends LoggedInServlet {
 
 			if("/checkbalance".equals(path)) {
 				address = "/WEB-INF/banking/Checkbalance.jsp";
-				List<presentation.Account> accounts = new ArrayList<presentation.Account>();
+				List<bank.application.presentation.Account> accounts = new ArrayList<bank.application.presentation.Account>();
 				for(String s : accountIds) {
 					try {
 						float balance = trans.getBalance(s);
-						accounts.add(new presentation.Account(s, balance));
+						accounts.add(new bank.application.presentation.Account(s, balance));
 					} catch (TransactionException tranex) { }
 				}
 				Balances bean = new Balances(clientId, accounts);

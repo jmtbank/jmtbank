@@ -1,12 +1,17 @@
-package application;
+package bank.application;
 
 import java.io.*;
 import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import bank.application.presentation.Balances;
+import bank.authentication.AuthenticationException;
+import bank.banking.Transaction;
+import bank.banking.TransactionException;
+import bank.banking.TransactorFactory;
 import banking.*;
-import presentation.*;
+//import presentation.*;
 
 public class BankingServlet extends LoggedInServlet {
 	private final float MAX_TRANSFER = 5000;
@@ -27,11 +32,11 @@ public class BankingServlet extends LoggedInServlet {
 						accountIds = c.getAccounts();
 					}
 				}
-				List<presentation.Account> accounts = new ArrayList<presentation.Account>();
+				List<bank.application.presentation.Account> accounts = new ArrayList<bank.application.presentation.Account>();
 				for(String s : accountIds) {
 					try {
 						float balance = trans.getBalance(s);
-						accounts.add(new presentation.Account(s, balance));
+						accounts.add(new bank.application.presentation.Account(s, balance));
 					} catch (TransactionException tranex) { }
 				}
 				Balances bean = new Balances(clientId, accounts);

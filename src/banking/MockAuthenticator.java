@@ -1,5 +1,7 @@
 package banking;
 
+import bank.authentication.AuthenticationException;
+
 public class MockAuthenticator implements Authentication {
 
 	public AuthenticatedClient authenticateClient(String username, String password) throws AuthenticationException {

@@ -1,4 +1,4 @@
-package application;
+package bank.application;
 
 import java.io.IOException;
 
@@ -11,8 +11,7 @@ import javax.servlet.http.HttpSession;
 
 import banking.AuthenticatedClient;
 import banking.Authentication;
-import banking.AuthenticationException;
-import banking.AuthenticationMethod;
+import bank.authentication.AuthenticationException;
 import banking.MockAuthenticator;
 
 public abstract class LoggedInServlet extends HttpServlet {

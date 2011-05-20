@@ -1,4 +1,7 @@
-package banking;
+package bank.banking;
+
+import banking.Account;
+import banking.AuthenticatedClient;
 
 
 public class TransactorFactory {
