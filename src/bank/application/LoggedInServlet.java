@@ -9,19 +9,35 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import banking.AuthenticatedClient;
-import banking.Authentication;
+import java.rmi.Remote;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
+
+import bank.authentication.Authentication;
 import bank.authentication.AuthenticationException;
-import banking.MockAuthenticator;
+import bank.Client;
+import bank.server.AuthenticationServer;
+import bank.authentication.AuthenticationMethod;
 
 public abstract class LoggedInServlet extends HttpServlet {
 	protected Authentication auth;
-	protected AuthenticatedClient authClient;
+	protected Client authClient;
 	protected HttpSession session;
 	
 	public LoggedInServlet() {
 		super();
-		auth = new MockAuthenticator();
+		String authloc = "localhost";
+//		try { authloc = getInitParameter("authenticationserver"); }
+//		catch(Exception e) {}
+		Remote remoteauth;
+		try {
+			Registry remoteregistry = LocateRegistry.getRegistry(authloc);
+			remoteauth = remoteregistry.lookup(AuthenticationServer.RMI_NAME);
+		} catch (Exception re) {
+			//todo: wat hier?
+			return;
+		}
+		auth = (Authentication) remoteauth;
 	}
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -30,14 +46,15 @@ public abstract class LoggedInServlet extends HttpServlet {
 		if(session.isNew()) {
 			session.setMaxInactiveInterval(60);
 		}
-		authClient = (AuthenticatedClient) session.getAttribute("authClient");
-		if(authClient == null || ! isAllowedAuth(authClient)) {
+		authClient = (Client) session.getAttribute("authClient");
+		if(authClient == null || ! isAllowedAuth()) {
 			String identifier = request.getParameter("identifier");
 			String secret = request.getParameter("secret");
 			try {
 				authClient = authenticate(identifier, secret);
 				session.setAttribute("authClient", authClient);
-				handleRequest(request, response);
+				if(authClient != null) { handleRequest(request, response); }
+				else { throw new AuthenticationException(); }
 			}
 			catch(AuthenticationException authex) {
 				//return to login, error
@@ -70,6 +87,6 @@ public abstract class LoggedInServlet extends HttpServlet {
 	throws ServletException, IOException;
 
 	protected abstract String getLoginPagePath();
-	protected abstract AuthenticatedClient authenticate(String identifier, String secret) throws AuthenticationException;
-	protected abstract boolean isAllowedAuth(AuthenticatedClient authcl);
+	protected abstract Client authenticate(String identifier, String secret) throws AuthenticationException;
+	protected abstract boolean isAllowedAuth();
 }

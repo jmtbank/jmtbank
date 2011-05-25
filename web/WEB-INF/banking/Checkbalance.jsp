@@ -5,19 +5,13 @@
 <TITLE>Login</TITLE>
 </HEAD>
 <BODY>
-<jsp:useBean id="balances"
-type="bank.application.presentation.Balances"
-scope="request" />
+<% String clientname = (String) request.getAttribute("clientname"); 
+	Float balance = (Float) request.getAttribute("balance");
+	String balstr = balance.toString();
+	String accountid = (String) request.getAttribute("accountid"); %>
 
-Hello <jsp:getProperty name="balances" property="clientId" />, <br />
-Your account(s) - (<%= balances.getAccounts().size() %>):<br /><br />
-<%
-for(Account a : balances.getAccounts()) {
-%>
-	Account: <%= a.getAccountId() %>
-	<%= a.getBalance() %> <br />
-<%
-}
-%>
+Hello <%= clientname %>, <br />
+Your account - (<%= accountid %>)<br /><br />
+Balance: <%= balance %><br /><br />
 Back to <a href="./">menu</a><br />
 </BODY></HTML>

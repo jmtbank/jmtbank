@@ -10,15 +10,10 @@
 		String error = (String) request.getAttribute("error");
 		out.println("<div class=error>" + error + "</div>");
 	}
+	String accountid = (String)request.getAttribute("accountid");
 %>
+Account: <%= accountid %><br />
 <form method="post">
-<select name="account">
-<%
-	for(String a : (String[])request.getAttribute("accountIds")) {
-		out.println("<option>" + a + "</option>");
-	}
-%>
-</select>
 Amount: <input type="text" name="amount"><br />
 <input type="submit" value="Deposit">
 </form>

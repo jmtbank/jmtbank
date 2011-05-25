@@ -33,6 +33,8 @@ public class Authenticator implements Authentication {
 			// Maybe we should just make up a generic error message here.
 			// Instead of potentially leaking information about (existing or not) usernames and/or passwords.
 			throw new AuthenticationException(e.getMessage());
+		} catch (NullPointerException e) {
+			return null;
 		}
 	}
 
@@ -56,6 +58,6 @@ public class Authenticator implements Authentication {
 			// Maybe we should just make up a generic error message here.
 			// Instead of potentially leaking information about (existing or not) usernames and/or passwords.
 			throw new AuthenticationException(e.getMessage());
-		}
+		} catch (NullPointerException e) { return null; }
 	}
 }

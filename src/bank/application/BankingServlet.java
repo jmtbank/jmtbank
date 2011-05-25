@@ -4,13 +4,19 @@ import java.io.*;
 import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
 
 import bank.application.presentation.Balances;
 import bank.authentication.AuthenticationException;
+import bank.authentication.AuthenticationMethod;
 import bank.banking.Transaction;
 import bank.banking.TransactionException;
 import bank.banking.TransactorFactory;
-import banking.*;
+import bank.server.TransactionServer;
+import bank.Client;
 //import presentation.*;
 
 public class BankingServlet extends LoggedInServlet {
@@ -18,32 +24,37 @@ public class BankingServlet extends LoggedInServlet {
 
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
-			Transaction trans = TransactorFactory.getTransaction(authClient);
+			String transloc = "localhost";
+//			try { transloc = getInitParameter("transactionserver"); }
+//			catch(Exception e) { }
+			Remote remotetrans;
+			try {
+				Registry remoteregistry = LocateRegistry.getRegistry(transloc);
+				remotetrans = remoteregistry.lookup(TransactionServer.RMI_NAME);
+			} catch (Exception re) {
+				//todo: wat hier?
+				return;
+			}
+			Transaction trans = (Transaction) remotetrans;
 
 			String address;
-			String clientId = authClient.getClientId();
+			String fullname = (authClient.getFirstName() + " " + authClient.getLastName());
 			String path = request.getPathInfo();
 			
 			if("/checkbalance".equals(path)) {
 				address = "/WEB-INF/banking/Checkbalance.jsp";
-				String[] accountIds = new String[0];
-				for(Client c : Client.getClients()) {
-					if(clientId.equals(c.getClientId())) {
-						accountIds = c.getAccounts();
-					}
-				}
-				List<bank.application.presentation.Account> accounts = new ArrayList<bank.application.presentation.Account>();
-				for(String s : accountIds) {
-					try {
-						float balance = trans.getBalance(s);
-						accounts.add(new bank.application.presentation.Account(s, balance));
-					} catch (TransactionException tranex) { }
-				}
-				Balances bean = new Balances(clientId, accounts);
-				request.setAttribute("balances", bean);
+				String accountid = authClient.getAccountId();
+				try {
+					float balance = trans.getBalance(accountid);
+					request.setAttribute("balance", balance);
+				} catch (Exception tranex) { }
+				request.setAttribute("clientname", fullname);
+				request.setAttribute("accountid", accountid);
 			} else if ("/transfer".equals(path)) {
 				address = "/WEB-INF/banking/Transfer.jsp";
-				String debAccountId = request.getParameter("debAccountId");
+				String debAccountId = authClient.getAccountId();
+				request.setAttribute("debaccount", debAccountId);
+				request.setAttribute("clientname", fullname);
 				String crdAccountId = request.getParameter("crdAccountId");
 				String amount = request.getParameter("transferamount");
 				if(debAccountId != null && crdAccountId != null && amount != null) {
@@ -53,6 +64,9 @@ public class BankingServlet extends LoggedInServlet {
 						if(currtransfer < MAX_TRANSFER) {
 							if(!((Float.parseFloat(amount) + currtransfer) > MAX_TRANSFER)) {
 								reply = trans.transfer(debAccountId, crdAccountId, Float.parseFloat(amount));
+								if(reply == null) {
+									reply = "Transfer successful";
+								}
 								currtransfer = currtransfer + Float.parseFloat(amount);
 								request.getSession().setAttribute("transferred", new Float(currtransfer));
 							}
@@ -65,6 +79,10 @@ public class BankingServlet extends LoggedInServlet {
 					}
 					request.setAttribute("transresult", reply);
 				}
+				try {
+					float balance = trans.getBalance(debAccountId);
+					request.setAttribute("balance", balance);
+				} catch (Exception tranex) { }
 			} else if("/logout".equals(path)) {
 				request.getSession().invalidate();
 				request.setAttribute("authMsg", new AuthenticationMessage("Logout successful"));
@@ -77,10 +95,15 @@ public class BankingServlet extends LoggedInServlet {
 	}
 
 	@Override
-	protected AuthenticatedClient authenticate(String identifier, String secret)
+	protected Client authenticate(String identifier, String secret)
 			throws AuthenticationException {
 		session.setAttribute("transferred", new Float(0));
-		return auth.authenticateClient(identifier, secret);
+		try { 
+			Client cl = auth.authenticateHBClient(identifier, secret);
+			session.setAttribute("loginmethod", AuthenticationMethod.USERNAME);
+			return cl;
+		}
+		catch(RemoteException re) { return null; }
 	}
 
 	@Override
@@ -89,7 +112,7 @@ public class BankingServlet extends LoggedInServlet {
 	}
 
 	@Override
-	protected boolean isAllowedAuth(AuthenticatedClient authcl) {
-		return authcl.getMethod() == AuthenticationMethod.USERNAME;
+	protected boolean isAllowedAuth() {
+		return session.getAttribute("loginmethod") == AuthenticationMethod.USERNAME;
 	}
 }

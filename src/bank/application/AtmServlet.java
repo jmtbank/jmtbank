@@ -8,16 +8,16 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
 
-import bank.application.presentation.Balances;
-import banking.AuthenticatedClient;
 import bank.authentication.AuthenticationException;
-import banking.MockAuthenticator;
-import banking.AuthenticationMethod;
-import banking.Client;
+import bank.authentication.AuthenticationMethod;
+import bank.Client;
 import bank.banking.Transaction;
 import bank.banking.TransactionException;
-import bank.banking.TransactorFactory;
 import banking.AtmLimit;
 
 public class AtmServlet extends LoggedInServlet {
@@ -26,40 +26,44 @@ public class AtmServlet extends LoggedInServlet {
 	private final float MAX_WITHDRAW = 500;
 	
 	public AtmServlet() {
-		auth = new MockAuthenticator();
+		//auth = new MockAuthenticator();
 	}
 	
 	
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
 
-			Transaction trans = TransactorFactory.getTransaction(authClient);
-			String address;
-			String clientId = authClient.getClientId();
-			String path = request.getPathInfo();
-			String[] accountIds = new String[0];
-			for(Client c : Client.getClients()) {
-				if(clientId.equals(c.getClientId())) {
-					accountIds = c.getAccounts();
-				}
+			String transloc = "localhost";
+//			String transloc = getInitParameter("transactionserver");
+			Remote remotetrans;
+			try {
+				Registry remoteregistry = LocateRegistry.getRegistry(transloc);
+				remotetrans = remoteregistry.lookup(bank.server.TransactionServer.RMI_NAME);
+			} catch (Exception re) {
+				//todo: wat hier?
+				return;
 			}
+			Transaction trans = (Transaction) remotetrans;
+
+			String address;
+			String fullname = (authClient.getFirstName() + " " + authClient.getLastName());
+			String path = request.getPathInfo();
 			AtmLimit lim = (AtmLimit) request.getSession().getAttribute("atmLimit");
 
 			if("/checkbalance".equals(path)) {
 				address = "/WEB-INF/banking/Checkbalance.jsp";
-				List<bank.application.presentation.Account> accounts = new ArrayList<bank.application.presentation.Account>();
-				for(String s : accountIds) {
-					try {
-						float balance = trans.getBalance(s);
-						accounts.add(new bank.application.presentation.Account(s, balance));
-					} catch (TransactionException tranex) { }
-				}
-				Balances bean = new Balances(clientId, accounts);
-				request.setAttribute("balances", bean);
+				String accountid = authClient.getAccountId();
+				request.setAttribute("accountid", accountid);
+				try {
+					float balance = trans.getBalance(accountid);
+					request.setAttribute("balance", balance);
+				} catch (Exception tranex) { }
+				request.setAttribute("clientname", fullname);
+				request.setAttribute("accountid", accountid);
 			} else if ("/withdraw".equals(path)) {
 				address = "/WEB-INF/atm/Withdraw.jsp";
-				request.setAttribute("accountIds",accountIds);
-				String account = request.getParameter("account");
+				String account = authClient.getAccountId();
+				request.setAttribute("accountid", account);
 				String amountStr = request.getParameter("amount");
 				String error = null;
 				String message = null;
@@ -94,8 +98,8 @@ public class AtmServlet extends LoggedInServlet {
 				}
 			} else if ("/deposit".equals(path)) {
 				address = "/WEB-INF/atm/Deposit.jsp";					
-				request.setAttribute("accountIds",accountIds);
-				String account = request.getParameter("account");
+				String account = authClient.getAccountId();
+				request.setAttribute("accountid", account);
 				String amountStr = request.getParameter("amount");
 				String error = null;
 				String message = null;
@@ -139,18 +143,23 @@ public class AtmServlet extends LoggedInServlet {
 			dispatcher.forward(request, response);
 	}
 	@Override
-	protected AuthenticatedClient authenticate(String identifier, String secret)
+	protected Client authenticate(String identifier, String secret)
 			throws AuthenticationException {
 		session.setAttribute("atmLimit", new AtmLimit());
-		return auth.authenticateCard(identifier, secret);
+		try { 
+			Client cl = auth.authenticateCDClient(identifier, secret);
+			session.setAttribute("loginmethod", AuthenticationMethod.CARD);
+			return cl;
+		}
+		catch(RemoteException re) { return null; } 
 	}
 	@Override
 	protected String getLoginPagePath() {
 		return "/WEB-INF/LoginCard.jsp";
 	}
 	@Override
-	protected boolean isAllowedAuth(AuthenticatedClient authcl) {
-		return authcl.getMethod() == AuthenticationMethod.CARD;
+	protected boolean isAllowedAuth() {
+		return session.getAttribute("loginmethod") == AuthenticationMethod.CARD;
 	}
 
 }
