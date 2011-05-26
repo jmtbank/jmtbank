@@ -33,7 +33,7 @@ public abstract class LoggedInServlet extends HttpServlet {
 	
 	public void init() {
 		String authloc = getInitParameter("authenticationserver");
-//		if(authloc == null)
+		if(authloc == null)
 			authloc = "localhost";
 		Remote remoteauth;
 		try {
@@ -46,7 +46,7 @@ public abstract class LoggedInServlet extends HttpServlet {
 			auth = (Authentication) remoteauth;
 		
 		String transloc = getInitParameter("transactionserver");
-//		if(transloc == null)
+		if(transloc == null)
 			transloc = "localhost";
 		Remote remotetrans;
 		try {
