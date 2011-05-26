@@ -40,7 +40,7 @@
 	<!-- target compile: compile everything is the source directory -->
 	<target name="compile" depends="init">
 		<javac destdir="${build.classes.dir}"
-			includeAntRuntime="false" srcdir="${sources.dir}">
+			includeAntRuntime="false" srcdir="${sources.dir}" debug="${build.debug}" debuglevel="${build.debuglevel}">
 		<classpath refid="tomcat.classpath"/>
 		<classpath refid="local.lib.classpath"/>
 		</javac>
