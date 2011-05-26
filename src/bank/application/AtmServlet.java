@@ -25,26 +25,8 @@ public class AtmServlet extends LoggedInServlet {
 	private final float MAX_DEPOSIT = 1000;
 	private final float MAX_WITHDRAW = 500;
 	
-	public AtmServlet() {
-		//auth = new MockAuthenticator();
-	}
-	
-	
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
-
-			String transloc = "localhost";
-//			String transloc = getInitParameter("transactionserver");
-			Remote remotetrans;
-			try {
-				Registry remoteregistry = LocateRegistry.getRegistry(transloc);
-				remotetrans = remoteregistry.lookup(bank.server.TransactionServer.RMI_NAME);
-			} catch (Exception re) {
-				//todo: wat hier?
-				return;
-			}
-			Transaction trans = (Transaction) remotetrans;
-
 			String address;
 			String fullname = (authClient.getFirstName() + " " + authClient.getLastName());
 			String path = request.getPathInfo();
@@ -151,7 +133,9 @@ public class AtmServlet extends LoggedInServlet {
 			session.setAttribute("loginmethod", AuthenticationMethod.CARD);
 			return cl;
 		}
-		catch(RemoteException re) { return null; } 
+		catch(RemoteException re) { 
+			throw new AuthenticationException("Unable to authenticate: "+re.getMessage());
+		}
 	}
 	@Override
 	protected String getLoginPagePath() {

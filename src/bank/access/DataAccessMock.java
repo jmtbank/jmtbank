@@ -20,7 +20,7 @@ public class DataAccessMock implements DataAccess {
 		cards = new HashMap<String,BankCard>();
 		for(int i = 1; i <= n; i++) {
 			accounts.put("001000000"+i, new Account("001000000"+i,"user"+i,i*1000));
-			clients.put("user"+i, new Client("user"+i,"password"+i,"001000000"+i));
+			clients.put("user"+i, new Client("user"+i,"password"+i,"001000000"+i, "firstname"+i, "lastname"+i));
 			cards.put("001000000"+i, new BankCard("001000000"+i,"001000000"+i,"0000"+i));
 		}
 	}

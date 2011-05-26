@@ -18,17 +18,23 @@ import bank.authentication.AuthenticationException;
 import bank.Client;
 import bank.server.AuthenticationServer;
 import bank.authentication.AuthenticationMethod;
+import bank.banking.Transaction;
+import bank.server.TransactionServer;
 
 public abstract class LoggedInServlet extends HttpServlet {
 	protected Authentication auth;
+	protected Transaction trans;
 	protected Client authClient;
 	protected HttpSession session;
 	
-	public LoggedInServlet() {
-		super();
-		String authloc = "localhost";
-//		try { authloc = getInitParameter("authenticationserver"); }
-//		catch(Exception e) {}
+//	public LoggedInServlet() {
+//		super();
+//	}
+	
+	public void init() {
+		String authloc = getInitParameter("authenticationserver");
+//		if(authloc == null)
+			authloc = "localhost";
 		Remote remoteauth;
 		try {
 			Registry remoteregistry = LocateRegistry.getRegistry(authloc);
@@ -37,7 +43,20 @@ public abstract class LoggedInServlet extends HttpServlet {
 			//todo: wat hier?
 			return;
 		}
-		auth = (Authentication) remoteauth;
+			auth = (Authentication) remoteauth;
+		
+		String transloc = getInitParameter("transactionserver");
+//		if(transloc == null)
+			transloc = "localhost";
+		Remote remotetrans;
+		try {
+			Registry remoteregistry = LocateRegistry.getRegistry(transloc);
+			remotetrans = remoteregistry.lookup(TransactionServer.RMI_NAME);
+		} catch (Exception re) {
+			//todo: wat hier?
+			return;
+		}
+		trans = (Transaction) remotetrans;
 	}
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -54,7 +73,7 @@ public abstract class LoggedInServlet extends HttpServlet {
 				authClient = authenticate(identifier, secret);
 				session.setAttribute("authClient", authClient);
 				if(authClient != null) { handleRequest(request, response); }
-				else { throw new AuthenticationException(); }
+				else { throw new AuthenticationException("authclient null"); }
 			}
 			catch(AuthenticationException authex) {
 				//return to login, error

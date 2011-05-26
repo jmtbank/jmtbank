@@ -17,26 +17,12 @@ import bank.banking.TransactionException;
 import bank.banking.TransactorFactory;
 import bank.server.TransactionServer;
 import bank.Client;
-//import presentation.*;
 
 public class BankingServlet extends LoggedInServlet {
 	private final float MAX_TRANSFER = 5000;
 
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 		throws ServletException, IOException {
-			String transloc = "localhost";
-//			try { transloc = getInitParameter("transactionserver"); }
-//			catch(Exception e) { }
-			Remote remotetrans;
-			try {
-				Registry remoteregistry = LocateRegistry.getRegistry(transloc);
-				remotetrans = remoteregistry.lookup(TransactionServer.RMI_NAME);
-			} catch (Exception re) {
-				//todo: wat hier?
-				return;
-			}
-			Transaction trans = (Transaction) remotetrans;
-
 			String address;
 			String fullname = (authClient.getFirstName() + " " + authClient.getLastName());
 			String path = request.getPathInfo();
@@ -103,7 +89,9 @@ public class BankingServlet extends LoggedInServlet {
 			session.setAttribute("loginmethod", AuthenticationMethod.USERNAME);
 			return cl;
 		}
-		catch(RemoteException re) { return null; }
+		catch(RemoteException re) { 
+			throw new AuthenticationException("Unable to authenticate: "+re.getMessage());
+		}
 	}
 
 	@Override
