@@ -9,12 +9,10 @@ import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 
-import bank.application.presentation.Balances;
 import bank.authentication.AuthenticationException;
 import bank.authentication.AuthenticationMethod;
 import bank.banking.Transaction;
 import bank.banking.TransactionException;
-import bank.banking.TransactorFactory;
 import bank.server.TransactionServer;
 import bank.Client;
 

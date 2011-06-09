@@ -18,7 +18,6 @@ import bank.authentication.AuthenticationMethod;
 import bank.Client;
 import bank.banking.Transaction;
 import bank.banking.TransactionException;
-import banking.AtmLimit;
 
 public class AtmServlet extends LoggedInServlet {
 

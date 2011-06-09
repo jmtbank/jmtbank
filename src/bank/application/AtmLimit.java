@@ -1,4 +1,4 @@
-package banking;
+package bank.application;
 
 public class AtmLimit {
 
