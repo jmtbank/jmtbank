@@ -9,7 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 
@@ -39,9 +41,12 @@ public abstract class LoggedInServlet extends HttpServlet {
 		try {
 			Registry remoteregistry = LocateRegistry.getRegistry(authloc);
 			remoteauth = remoteregistry.lookup(AuthenticationServer.RMI_NAME);
-		} catch (Exception re) {
+		} catch (RemoteException e) {
 			//todo: wat hier?
-			return;
+			//return;
+			throw new RuntimeException("Connection to authenticationserver failed",e);
+		} catch (NotBoundException e) {
+			throw new RuntimeException("Connection to authenticationserver failed",e);
 		}
 			auth = (Authentication) remoteauth;
 		
@@ -52,9 +57,10 @@ public abstract class LoggedInServlet extends HttpServlet {
 		try {
 			Registry remoteregistry = LocateRegistry.getRegistry(transloc);
 			remotetrans = remoteregistry.lookup(TransactionServer.RMI_NAME);
-		} catch (Exception re) {
+		} catch (Exception e) {
 			//todo: wat hier?
-			return;
+			e.printStackTrace();
+			throw new RuntimeException("Connection to transactionserver failed",e);
 		}
 		trans = (Transaction) remotetrans;
 	}
