@@ -69,4 +69,32 @@
 			overwrite="true"/>
 	</target>
 
+
+	<!-- target start_registry: start the RMI registry -->
+	<target name="start_registry">
+		<exec executable="rmiregistry" spawn="true">
+			<env key="CLASSPATH" value="classes"/>
+		</exec>
+	</target>
+
+	<!-- target start_db: start the data access (mock) server -->
+	<target name="start_db" depends="compile">
+		<java classname="bank.server.DataAccessServer" classpath="${build.classes.dir}" fork="${start_forked}">
+			<jvmarg value="-Djava.security.policy=${policy.server}" />
+		</java>
+	</target>
+
+	<!-- target start_auth: start the authentication server -->
+	<target name="start_auth" depends="compile">
+		<java classname="bank.server.AuthenticationServer" classpath="${build.classes.dir}" fork="${start_forked}">
+			<jvmarg value="-Djava.security.policy=${policy.both}" />
+		</java>
+	</target>
+
+	<!-- target start_trans: start the transaction server -->
+	<target name="start_trans" depends="compile">
+		<java classname="bank.server.TransactionServer" classpath="${build.classes.dir}" fork="${start_forked}">
+			<jvmarg value="-Djava.security.policy=${policy.both}" />
+		</java>
+	</target>
 </project>

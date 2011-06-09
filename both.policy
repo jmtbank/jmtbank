@@ -2,11 +2,5 @@ grant  {
 	permission java.net.SocketPermission "localhost:1099", "connect";
 	permission java.net.SocketPermission "localhost", "accept";
 	permission java.net.SocketPermission "localhost", "connect";
-	permission java.net.SocketPermission "*.student.utwente.nl", "accept";
-	permission java.net.SocketPermission "*.student.utwente.nl", "connect";
-	permission java.net.SocketPermission "*.mobiel.utwente.nl", "accept";
-	permission java.net.SocketPermission "*.mobiel.utwente.nl", "connect";
-	permission java.net.SocketPermission "*.mobiel.utwente.nl", "resolve";
-	permission java.net.SocketPermission "*", "accept,resolve,connect";
 };
 	
