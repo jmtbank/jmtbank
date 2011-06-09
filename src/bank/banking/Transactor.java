@@ -117,7 +117,11 @@ public class Transactor implements Transaction {
 	 */
 	public float getBalance(String accountId)
 		throws RemoteException, TransactionException {
-			try { Account acc = db.getAccount(accountId); return acc.getBalance(); }
+			try { Account acc = db.getAccount(accountId); 
+				if(acc == null)
+					throw new TransactionException("Unknown Account: "+accountId);
+				else
+					return acc.getBalance(); }
 			catch(RemoteException e) { throw e; }
 			catch(DataAccessException e) { throw new TransactionException(e.getMessage()); }
 		}
