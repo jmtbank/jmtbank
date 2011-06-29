@@ -72,7 +72,7 @@ public class Transactor implements Transaction {
 	 */
 	public String withdraw(String debitAccountId, float amount)
 		throws RemoteException, TransactionException {
-		return getProcessor(debitAccountId).deposit(debitAccountId, amount);
+		return getProcessor(debitAccountId).withdraw(debitAccountId, amount);
 	}
 
 	/** Returns the balance of account 'accountId'.
