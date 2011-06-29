@@ -6,6 +6,8 @@ public class TestDatabase {
 
 	public static void main(String[] args) {
 		
+		if(args.length != 1) { System.exit(0); }
+		
 		String driver = "com.mysql.jdbc.Driver";
 		String dbHost = "localhost";
 		String dbName = "jmtbank";
@@ -32,12 +34,16 @@ public class TestDatabase {
 				float balance = resultSet.getFloat("balance");
 				String username = resultSet.getString("username");
 				System.out.println("username = "+username+"\nold balance = "+balance);
-				float newbalance = balance - 500;
+				float newbalance = balance;
+				try { newbalance = balance - Float.parseFloat(args[0]); }
+				catch(NumberFormatException e) { System.out.println("arg not a number"); System.exit(0); }
 				Statement update = conn.createStatement();
 				String updatequery = "UPDATE accounts SET balance = " + newbalance + " WHERE account = '0010000001'";
 				System.out.println("executing query");
 				update.executeUpdate(updatequery);
 				System.out.println("update complete");
+				if(newbalance < 0) { System.out.println("rolling back"); conn.rollback(); }
+				else { System.out.println("committing"); conn.commit(); }
 				statement = conn.createStatement();
 				ResultSet rs = statement.executeQuery(query);
 				if(rs.first()) {
