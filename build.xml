@@ -20,6 +20,10 @@
 			<include name="*.jar"/>
 		</fileset>
 	</path>
+	
+	<path id="execution.classpath">
+		<pathelement location="${connectorj.jar}" />
+	</path>
 
 	<!-- target init: creates necessary directories -->
 	<target name="init">
