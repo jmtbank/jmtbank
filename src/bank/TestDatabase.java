@@ -42,13 +42,15 @@ public class TestDatabase {
 				System.out.println("executing query");
 				update.executeUpdate(updatequery);
 				System.out.println("update complete");
-				if(newbalance < 0) { System.out.println("rolling back"); conn.rollback(); }
-				else { System.out.println("committing"); conn.commit(); }
+	//			if(newbalance < 0) { System.out.println("rolling back"); conn.rollback(); }
+	//			else { System.out.println("committing"); conn.commit(); }
 				statement = conn.createStatement();
 				ResultSet rs = statement.executeQuery(query);
 				if(rs.first()) {
 					balance = rs.getFloat("balance");
 					username = resultSet.getString("username");
+					if(balance < 0) { System.out.println("rolling back"); conn.rollback(); }
+					else { System.out.println("committing"); conn.commit(); }
 					System.out.println("username = "+username+"\nnew balance = "+balance);
 				}
 				else { System.out.println("updated query has no results"); }

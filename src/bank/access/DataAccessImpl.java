@@ -44,15 +44,22 @@ public class DataAccessImpl implements DataAccess {
      * @throws DataAccessException
 	 */
 	public Account getAccount(String accountId) throws RemoteException, DataAccessException {
+		boolean alreadyexists = false;
 		try {
-			Class.forName(driver);
-			conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-			conn.setAutoCommit(false);
+			if(conn == null || conn.isClosed()) {
+				//System.out.println("creating new conn for getAccount");
+				Class.forName(driver);
+				conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+				conn.setAutoCommit(false);
+			} else { alreadyexists = true; }
 		} catch(ClassNotFoundException cnfe) {
-			//TODO
+				//TODO
+				throw new RemoteException("cnfe");
 		} catch(SQLException sqle) {
-			//TODO
+				//TODO
+				throw new RemoteException("sqle");
 		}
+		
 		Account account = null;
 		try { 
 			Statement getaccountstate = conn.createStatement();
@@ -64,7 +71,7 @@ public class DataAccessImpl implements DataAccess {
 				account = new Account(accountId, accuser, accbalance);
 			}
 		} catch(SQLException sqle) { }
-		try { conn.close(); }
+		try { if(!alreadyexists) { conn.close(); } }
 		catch(SQLException sqle) {
 			//TODO
 		}
@@ -79,14 +86,17 @@ public class DataAccessImpl implements DataAccess {
      * @throws DataAccessException
 	 */
 	public Client getClient(String username) throws RemoteException, DataAccessException {
+		boolean alreadyexists = false;
 		try {
-			Class.forName(driver);
-			conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-			conn.setAutoCommit(false);
+			if(conn == null || conn.isClosed()) {
+				Class.forName(driver);
+				conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+				conn.setAutoCommit(false);
+			} else { alreadyexists = true; }
 		} catch(ClassNotFoundException cnfe) {
-			//TODO
+				//TODO
 		} catch(SQLException sqle) {
-			//TODO
+				//TODO
 		}
 		
 		Client client = null;
@@ -103,7 +113,7 @@ public class DataAccessImpl implements DataAccess {
 			}
 		} catch(SQLException sqle) { }
 		
-		try { conn.close(); }
+		try { if(!alreadyexists) { conn.close(); } }
 		catch(SQLException sqle) {
 			//TODO
 		}
@@ -119,14 +129,17 @@ public class DataAccessImpl implements DataAccess {
      * @throws DataAccessException
 	 */
 	public BankCard getBankCard(String cardId) throws RemoteException, DataAccessException {
+		boolean alreadyexists = false;
 		try {
-			Class.forName(driver);
-			conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-			conn.setAutoCommit(false);
+			if(conn == null || conn.isClosed()) {
+				Class.forName(driver);
+				conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+				conn.setAutoCommit(false);
+			} else { alreadyexists = true; }
 		} catch(ClassNotFoundException cnfe) {
-			//TODO
+				//TODO
 		} catch(SQLException sqle) {
-			//TODO
+				//TODO
 		}
 		
 		BankCard bankcard = null;
@@ -141,7 +154,7 @@ public class DataAccessImpl implements DataAccess {
 			}
 		} catch(SQLException sqle) { }
 		
-		try { conn.close(); }
+		try { if(!alreadyexists) { conn.close(); } }
 		catch(SQLException sqle) {
 			//TODO
 		}
@@ -215,6 +228,7 @@ public class DataAccessImpl implements DataAccess {
 	/** Starts a transaction
      * @throws RemoteException
      * @throws DataAccessException
+	 * @require no existing connection
 	 */
 	public void beginTransaction() throws RemoteException, DataAccessException {
 		// transactions not implemented, modifications are committed directly

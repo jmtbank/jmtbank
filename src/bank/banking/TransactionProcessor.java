@@ -26,26 +26,29 @@ public class TransactionProcessor implements TransactionProcessing {
 	 */
 	public String transfer(String debitAccountId, String creditAccountId, float amount)
 		throws RemoteException, TransactionException {
-			float oldbalance = 0;
-			try { oldbalance = getBalance(debitAccountId); }
-			catch (Exception e) { return e.getMessage(); }
-			if(oldbalance >= amount) {
+//			float oldbalance = 0;
+//			try { oldbalance = getBalance(debitAccountId); }
+//			catch (Exception e) { return e.getMessage(); }
+//			if(oldbalance >= amount) {
 				try {
 					db.beginTransaction();
 					db.debitAccount(debitAccountId, amount);
 					db.creditAccount(creditAccountId, amount);
+					if(getBalance(debitAccountId) < 0) { db.rollbackTransaction(); return "Insufficient funds"; }
+					else { 
 					db.commitTransaction();
 					return null;
+					}
 				}
 				catch(Exception e) {
 					try { db.rollbackTransaction(); } //moet check of begintransaction al is aangeroepen hier of in db?
 					catch(DataAccessException dae) {}
 					return e.getMessage();
 				}
-			}
-			else {
-				return "Insufficient funds";
-			}
+//			}
+//			else {
+//				return "Insufficient funds";
+//			}
 		}
 	
 	/** Deposits some 'amount' of money to account 'creditAccountId'.
@@ -80,23 +83,23 @@ public class TransactionProcessor implements TransactionProcessing {
 	 */
 	public String withdraw(String debitAccountId, float amount)
 		throws RemoteException, TransactionException {
-			float oldbalance = 0;
-			try { oldbalance = getBalance(debitAccountId); }
-			catch (Exception e) { return e.getMessage(); }
-			if(oldbalance >= amount) {
+//			float oldbalance = 0;
+//			try { oldbalance = getBalance(debitAccountId); }
+//			catch (Exception e) { return e.getMessage(); }
+//			if(oldbalance >= amount) {
 				try {
 					db.beginTransaction();
 					db.debitAccount(debitAccountId, amount);
-					db.commitTransaction();
-					return null;
+					if(getBalance(debitAccountId) < 0) { db.rollbackTransaction(); return "Insufficient funds"; }
+					else { db.commitTransaction(); return null;	}
 				} catch(Exception e) { 
 					try{ db.rollbackTransaction(); } 
 					catch(DataAccessException dae) {}
 					return e.getMessage(); 
 				}
-			} else {
-				return "Insufficient funds";
-			}
+		//	} else {
+		//		return "Insufficient funds";
+		//	}
 		}
 
 	/** Returns the balance of account 'accountId'.
@@ -134,6 +137,7 @@ public class TransactionProcessor implements TransactionProcessing {
 			float amount) throws RemoteException, TransactionException {
 		System.err.println("prepareCredit " + amount + " naar " + creditAccountId + " (van " + debitAccountId + ")");
 		try {
+			db.beginTransaction();
 			db.creditAccount(creditAccountId, amount);
 		} catch (DataAccessException e) {
 			// TODO Auto-generated catch block
@@ -147,6 +151,7 @@ public class TransactionProcessor implements TransactionProcessing {
 			float amount) throws RemoteException, TransactionException {
 		System.err.println("prepareDebit " + amount + " van " + debitAccountId + " (naar " + creditAccountId + ")");
 		try {
+			db.beginTransaction();
 			db.debitAccount(debitAccountId, amount);
 		} catch (DataAccessException e) {
 			// TODO Auto-generated catch block

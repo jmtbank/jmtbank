@@ -68,8 +68,10 @@ public class Authenticator implements Authentication {
 	 */
 	public Client authenticateCDClient(String cardId, String PIN) throws RemoteException, AuthenticationException {
 		System.out.print("Authentication card " + cardId + ": ");
+		//int i = 0;
+		if(cardId == null || PIN == null) { return null; }
 		String bankcode = cardId.substring(0, BankCard.BANK_CODE_LENGTH);
-		if(bankcode.equals(Bank.getBankCode())) {
+		if(cardId.startsWith(Bank.getBankCode())) {
 			try {
 				BankCard card = db.getBankCard(cardId);
 				Client cl = null;

@@ -5,7 +5,7 @@ import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 
 import bank.access.DataAccess;
-import bank.access.DataAccessMock;
+import bank.access.DataAccessImpl;
 import bank.server.TransactionServer;
 
 public class TransactorTest {
@@ -14,7 +14,7 @@ public static void main(String[] args) {
 	
 	if(args.length == 1) {
 		if(args[0].equals("l")) {
-			DataAccess db = new DataAccessMock();
+			DataAccess db = new DataAccessImpl();
 			trans = new TransactionProcessor(db);
 		}
 		else if(args[0].equals("r")) {
@@ -34,15 +34,15 @@ public static void main(String[] args) {
 	try {
 		System.out.println("balance acc1: "+trans.getBalance("0010000001")+"\n balance acc2: "+trans.getBalance("0010000002"));
 		System.out.println("Transferring 500 from acc1 to acc2");
-		trans.transfer("0010000001","0010000002",500);
+		System.out.println(trans.transfer("0010000001","0010000002",500));
 		System.out.println(" balance acc1: "+trans.getBalance("0010000001")+"\n balance acc2: "+trans.getBalance("0010000002")+"\n");
 		
 		System.out.println("withdrawing 2000 from acc3\n Old balance: "+trans.getBalance("0010000003"));
-		trans.withdraw("0010000003", 2000);
+		System.out.println(trans.withdraw("0010000003", 2000));
 		System.out.println(" New balance: "+trans.getBalance("0010000003")+"\n");
 		
 		System.out.println("depositing 750 to acc4\n Old balance: "+trans.getBalance("0010000004"));
-		trans.deposit("0010000004", 750);
+		System.out.println(trans.deposit("0010000004", 750));
 		System.out.println(" New balance: "+trans.getBalance("0010000004")+"\n");
 		
 		System.out.println("Transferring from a non-existing account");

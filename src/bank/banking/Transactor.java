@@ -36,14 +36,17 @@ public class Transactor implements Transaction {
 		throws RemoteException, TransactionException {
 		if(isLocal(creditAccountId) && isLocal(debitAccountId)) {
 			return local.transfer(debitAccountId, creditAccountId, amount);
-		} else if (isLocal(debitAccountId)){
+		} else if (isLocal(debitAccountId)){ 
 			TransactionProcessing debitProc = local;
 			TransactionProcessing creditProc = getProcessor(creditAccountId);
-			debitProc.prepareDebit(debitAccountId, creditAccountId, amount);
-			creditProc.prepareCredit(creditAccountId, debitAccountId, amount);
-			debitProc.commit();
-			creditProc.commit();
-			return null;
+			try {
+				debitProc.prepareDebit(debitAccountId, creditAccountId, amount);
+				creditProc.prepareCredit(creditAccountId, debitAccountId, amount);
+				if(debitProc.getBalance(debitAccountId) < 0) { debitProc.rollback(); creditProc.rollback(); }
+				else { debitProc.commit(); creditProc.commit(); }
+				return null;
+			} catch(RemoteException re) { debitProc.rollback(); creditProc.rollback(); throw re; }
+			catch(TransactionException te) { debitProc.rollback(); creditProc.rollback(); throw te; }
 		} else {
 			return "At least one of the accounts should be local";
 		}
