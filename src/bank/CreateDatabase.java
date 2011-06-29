@@ -11,7 +11,7 @@ import java.sql.*;
 
 public class CreateDatabase {
   public static void main(String[] args) {
-    
+    String bc = Bank.getBankCode();
     Connection connection = null;
     String driver = "com.mysql.jdbc.Driver";
     String host = "localhost";
@@ -28,9 +28,9 @@ public class CreateDatabase {
 	String[] carrows = new String[5];
 	for(int i = 0; i<accrows.length; i++) {
 		int j = i+1;
-		accrows[i] = "('001000000"+j+"', 'user"+j+"', "+j*1000+")";
-		clirows[i] = "('user"+j+"', 'password"+j+"', '001000000"+j+"', 'firstname"+j+"', 'lastname"+j+"')";
-		carrows[i] = "('001000000"+j+"', '001000000"+j+"', '0000"+j+"')";
+		accrows[i] = "('"+bc+"000000"+j+"', 'user"+j+"', "+j*1000+")";
+		clirows[i] = "('user"+j+"', 'password"+j+"', '"+bc+"000000"+j+"', 'firstname"+j+"', 'lastname"+j+"')";
+		carrows[i] = "('"+bc+"000000"+j+"', '"+bc+"000000"+j+"', '0000"+j+"')";
 	}
     try {
         Class.forName(driver);
