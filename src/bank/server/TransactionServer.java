@@ -1,7 +1,9 @@
 package bank.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.rmi.*;
 
 import bank.Bank;
@@ -29,9 +31,22 @@ public class TransactionServer {
 			System.setSecurityManager(new SecurityManager());
 		}
 		String dbServer = "localhost";
-		if(args.length == 1) {
+		if(args.length >= 1) {
 			dbServer = args[0];
 		}
+		
+		String hostname = null;
+		if(args.length == 2) {
+			hostname = args[1];
+		} else {
+			try {
+				hostname = InetAddress.getLocalHost().getHostAddress();
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+				System.err.println("Can't find a name for this host");
+			}
+		}
+
 		try {
 	        Registry dbRegistry = LocateRegistry.getRegistry(dbServer);
 			System.out.println("Getting the database from the registry.");	        
@@ -74,8 +89,8 @@ public class TransactionServer {
 			}
 
 			if(interbank != null) {
-				System.out.println("Registering with the Interbanking registy.");
-				interbank.registerTransactionProcessor(Bank.getBankCode(), "130.89.235.51", RMI_TRANSACTIONPROCESSING_NAME);
+				System.out.println("Registering with the Interbanking registy. bank " +Bank.getBankCode() + "rmi://"+hostname + "/" +RMI_TRANSACTIONPROCESSING_NAME);
+				interbank.registerTransactionProcessor(Bank.getBankCode(), hostname, RMI_TRANSACTIONPROCESSING_NAME);
 			}
 			
 			System.out.println("TransactionServer running.. (Press enter to stop)");
