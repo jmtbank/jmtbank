@@ -1,27 +1,25 @@
 package bank.banking;
 
-/**
- * <p>Title:        Interface TransactionManager</p>
- * <p>Description:  Provided by the transaction processing sub-system.
- *                  Allows the application layer to obtain balance information
- *                  and to transfer money between accounts.</p>
- * <p>Copyright:    Copyright (c) 2010</p>
- * <p>Company:      University of Twente</p>
- * @author Dick Quartel, L. Ferreira Pires
- * @version 1.0
- */
-
+import java.net.MalformedURLException;
 import java.rmi.*;
+
 import bank.Account;
-import bank.access.DataAccess;
-import bank.access.DataAccessException;
+import bank.Bank;
+import bank.interbanking.Interbank;
+
+/**
+ * Transactor used by the bank.application.*Servlet to do transactions.
+ * Calls remote TransactionProcessors when needed.
+ */
 
 public class Transactor implements Transaction {
 
-	private DataAccess db;
+	private TransactionProcessing local;
+	private Interbank interbank;
 	
-	public Transactor(DataAccess db) {
-		this.db = db;
+	public Transactor(TransactionProcessing local, Interbank interbank) {
+		this.local = local;
+		this.interbank = interbank;
 	}
 		
 	/** Transfers some 'amount' of money from account 'debitAccountId'
@@ -36,27 +34,20 @@ public class Transactor implements Transaction {
 	 */
 	public String transfer(String debitAccountId, String creditAccountId, float amount)
 		throws RemoteException, TransactionException {
-			float oldbalance = 0;
-			try { oldbalance = getBalance(debitAccountId); }
-			catch (Exception e) { return e.getMessage(); }
-			if(oldbalance >= amount) {
-				try {
-					db.beginTransaction();
-					db.debitAccount(debitAccountId, amount);
-					db.creditAccount(creditAccountId, amount);
-					db.commitTransaction();
-					return null;
-				}
-				catch(Exception e) {
-					try { db.rollbackTransaction(); } //moet check of begintransaction al is aangeroepen hier of in db?
-					catch(DataAccessException dae) {}
-					return e.getMessage();
-				}
-			}
-			else {
-				return "Insufficient funds";
-			}
+		if(isLocal(creditAccountId) && isLocal(debitAccountId)) {
+			return local.transfer(debitAccountId, creditAccountId, amount);
+		} else if (isLocal(debitAccountId)){
+			TransactionProcessing debitProc = local;
+			TransactionProcessing creditProc = getProcessor(creditAccountId);
+			debitProc.prepareDebit(debitAccountId, creditAccountId, amount);
+			creditProc.prepareCredit(creditAccountId, debitAccountId, amount);
+			debitProc.commit();
+			creditProc.commit();
+			return null;
+		} else {
+			return "At least one of the accounts should be local";
 		}
+	}
 	
 	/** Deposits some 'amount' of money to account 'creditAccountId'.
      * @param creditAccountId credit account id
@@ -68,17 +59,8 @@ public class Transactor implements Transaction {
 	 */
 	public String deposit(String creditAccountId, float amount)
 		throws RemoteException, TransactionException {
-			try {
-				db.beginTransaction();
-				db.creditAccount(creditAccountId, amount);
-				db.commitTransaction();
-				return null;
-			} catch(Exception e) { 
-				try { db.rollbackTransaction(); }
-				catch(DataAccessException dae) {}
-				return e.getMessage(); 
-			}
-		}
+		return getProcessor(creditAccountId).deposit(creditAccountId, amount);
+	}
 	
 	/** Withdraws some 'amount' of money from account 'debitAccountId'.
      * @param debitAccountId debit account id
@@ -90,24 +72,8 @@ public class Transactor implements Transaction {
 	 */
 	public String withdraw(String debitAccountId, float amount)
 		throws RemoteException, TransactionException {
-			float oldbalance = 0;
-			try { oldbalance = getBalance(debitAccountId); }
-			catch (Exception e) { return e.getMessage(); }
-			if(oldbalance >= amount) {
-				try {
-					db.beginTransaction();
-					db.debitAccount(debitAccountId, amount);
-					db.commitTransaction();
-					return null;
-				} catch(Exception e) { 
-					try{ db.rollbackTransaction(); } 
-					catch(DataAccessException dae) {}
-					return e.getMessage(); 
-				}
-			} else {
-				return "Insufficient funds";
-			}
-		}
+		return getProcessor(debitAccountId).deposit(debitAccountId, amount);
+	}
 
 	/** Returns the balance of account 'accountId'.
      * @param accountId account id
@@ -117,13 +83,30 @@ public class Transactor implements Transaction {
 	 */
 	public float getBalance(String accountId)
 		throws RemoteException, TransactionException {
-			try { Account acc = db.getAccount(accountId); 
-				if(acc == null)
-					throw new TransactionException("Unknown Account: "+accountId);
-				else
-					return acc.getBalance(); }
-			catch(RemoteException e) { throw e; }
-			catch(DataAccessException e) { throw new TransactionException(e.getMessage()); }
+		return getProcessor(accountId).getBalance(accountId);
+	}
+
+	private boolean isLocal(String accountId) {
+		return accountId.startsWith(Bank.getBankCode());
+	}
+	private TransactionProcessing getProcessor(String accountId) throws RemoteException,TransactionException {
+		if(isLocal(accountId)) {
+			return local;
+		} else {
+			String bankCode = Account.getBankCode(accountId);
+			try {
+				String addr = interbank.lookupTransactionProcessor(bankCode);
+				if(addr == null)
+					throw new TransactionException("Can't find Transactionprocessor for account " + accountId + " (bankcode "+bankCode+")");
+				return (TransactionProcessing)Naming.lookup(addr/*.substring("rmi:".length())*/);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				throw new TransactionException(e.getMessage());
+			} catch (NotBoundException e) {
+				e.printStackTrace();
+				throw new TransactionException(e.getMessage());
+			}
 		}
+	}
 
 }

@@ -10,7 +10,7 @@ public class TransactorLocalTest {
 public static void main(String[] args) {
 
 	DataAccess db = new DataAccessMock();
-	Transaction trans = new Transactor(db);
+	Transaction trans = new TransactionProcessor(db);
 	try {
 		System.out.println("balance acc1: "+trans.getBalance("0010000001")+"\n balance acc2: "+trans.getBalance("0010000002"));
 		System.out.println("Transferring 500 from acc1 to acc2");

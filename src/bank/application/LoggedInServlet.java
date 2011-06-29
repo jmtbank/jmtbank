@@ -56,7 +56,7 @@ public abstract class LoggedInServlet extends HttpServlet {
 		Remote remotetrans;
 		try {
 			Registry remoteregistry = LocateRegistry.getRegistry(transloc);
-			remotetrans = remoteregistry.lookup(TransactionServer.RMI_NAME);
+			remotetrans = remoteregistry.lookup(TransactionServer.RMI_TRANSACTION_NAME);
 		} catch (Exception e) {
 			//todo: wat hier?
 			e.printStackTrace();

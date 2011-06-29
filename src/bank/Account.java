@@ -82,4 +82,11 @@ public class Account implements java.io.Serializable {
     public void setBalance(float balance) {
 		this.balance = balance;
 	}
+    
+    /**
+     * Get the bankcode from an accountId.
+     */
+    public static String getBankCode(String accountId) {
+    	return accountId.substring(0, BANK_CODE_LENGTH);
+    }
 }

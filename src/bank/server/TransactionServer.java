@@ -1,12 +1,17 @@
 package bank.server;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.rmi.*;
 
+import bank.Bank;
 import bank.access.DataAccess;
 import bank.access.DataAccessException;
 import bank.banking.Transaction;
+import bank.banking.TransactionProcessing;
+import bank.banking.TransactionProcessor;
 import bank.banking.Transactor;
+import bank.interbanking.Interbank;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -15,7 +20,8 @@ import java.rmi.RemoteException;
 import java.security.AccessControlException;
 
 public class TransactionServer {
-	public static final String RMI_NAME = "bank.banking.Transaction";
+	public static final String RMI_TRANSACTIONPROCESSING_NAME = "bank.banking.TransactionProcessing";
+	public static final String RMI_TRANSACTION_NAME = "bank.banking.Transaction";
 
 	public static void main (String[] args) {
 		if (System.getSecurityManager() == null) {
@@ -36,15 +42,40 @@ public class TransactionServer {
 	        db.getAccount("");
 	        System.out.println("OK");
 	        Registry localRegistry = LocateRegistry.getRegistry();
-	        Transactor trans = new Transactor(db);
+	        TransactionProcessor transProc = new TransactionProcessor(db);
+	        System.out.println("Exporting the TransactionProcessor.");
+	        TransactionProcessing transProcStub = (TransactionProcessing) UnicastRemoteObject.exportObject(transProc,0);
+	        System.out.println("Registering the TransactionProcessor in the registry.");	        
+	        try {
+				localRegistry.bind(RMI_TRANSACTIONPROCESSING_NAME, transProcStub);
+			} catch (AlreadyBoundException e) {
+				System.err.println("WARNING: An other transaction server is register in the registry, overwriting its binding.");
+				localRegistry.rebind(RMI_TRANSACTIONPROCESSING_NAME, transProcStub);				
+			}
+			
+			Interbank interbank = null;
+			try {
+				interbank = (Interbank) Naming.lookup("rmi://ewi887.ewi.utwente.nl/InterBank");
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				System.err.println("ERROR: Can't connect to the interbanking registry.");
+			} 
+			Transaction trans = new Transactor(transProc, interbank);
+
 	        System.out.println("Exporting the Transactor.");
 	        Transaction transStub = (Transaction) UnicastRemoteObject.exportObject(trans,0);
 	        System.out.println("Registering the Transactor in the registry.");	        
 	        try {
-				localRegistry.bind(RMI_NAME, transStub);
+				localRegistry.bind(RMI_TRANSACTION_NAME, transStub);
 			} catch (AlreadyBoundException e) {
 				System.err.println("WARNING: An other transaction server is register in the registry, overwriting its binding.");
-				localRegistry.rebind(RMI_NAME, transStub);				
+				localRegistry.rebind(RMI_TRANSACTION_NAME, transStub);				
+			}
+
+			if(interbank != null) {
+				System.out.println("Registering with the Interbanking registy.");
+				interbank.registerTransactionProcessor(Bank.getBankCode(), "130.89.235.51", RMI_TRANSACTIONPROCESSING_NAME);
 			}
 			
 			System.out.println("TransactionServer running.. (Press enter to stop)");
@@ -54,9 +85,14 @@ public class TransactionServer {
 				System.err.println("Error waiting for input.");
 			}
 			
+			if(interbank != null) {
+				System.out.println("Deregistering with the Interbanking registy.");
+				interbank.deregisterTransactionProcessor(Bank.getBankCode());
+			}
+			
 			System.out.println("Unbinding from the registry.");
 			try {
-				localRegistry.unbind(RMI_NAME);
+				localRegistry.unbind(RMI_TRANSACTIONPROCESSING_NAME);
 			} catch (NotBoundException e) {
 				System.err.println("Error unbinding from registry.");
 			}

@@ -1,14 +1,11 @@
 package bank.banking;
 
-import java.rmi.*;
 import java.rmi.Remote;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 
-import bank.Account;
 import bank.access.DataAccess;
 import bank.access.DataAccessMock;
-import bank.access.DataAccessException;
 import bank.server.TransactionServer;
 
 public class TransactorTest {
@@ -18,14 +15,14 @@ public static void main(String[] args) {
 	if(args.length == 1) {
 		if(args[0].equals("l")) {
 			DataAccess db = new DataAccessMock();
-			trans = new Transactor(db);
+			trans = new TransactionProcessor(db);
 		}
 		else if(args[0].equals("r")) {
 			Remote remotetrans;
 			try {
 				Registry remoteregistry = LocateRegistry.getRegistry("localhost");
 				System.out.println("Located registry");
-				remotetrans = remoteregistry.lookup(TransactionServer.RMI_NAME);
+				remotetrans = remoteregistry.lookup(TransactionServer.RMI_TRANSACTION_NAME);
 				System.out.println("Received remote object");
 			} catch (Exception re) {
 				System.out.println("Received exception while trying to retrieve remote object");
