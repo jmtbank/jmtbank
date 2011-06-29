@@ -20,10 +20,6 @@
 			<include name="*.jar"/>
 		</fileset>
 	</path>
-	
-	<path id="execution.classpath">
-		<pathelement location="${connectorj.jar}" />
-	</path>
 
 	<!-- target init: creates necessary directories -->
 	<target name="init">
@@ -83,7 +79,7 @@
 
 	<!-- target start_db: start the data access (mock) server -->
 	<target name="start_db" depends="compile">
-		<java classname="bank.server.DataAccessServer" classpath="${build.classes.dir}" fork="${start_forked}">
+		<java classname="bank.server.DataAccessServer" classpath="${build.classes.dir}:${connectorj.jar}" fork="${start_forked}">
 			<jvmarg value="-Djava.security.policy=${policy.server}" />
 		</java>
 	</target>
