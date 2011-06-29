@@ -10,7 +10,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 import bank.access.DataAccess;
-import bank.access.DataAccessMock;
+import bank.access.DataAccessImpl;
 
 public class DataAccessServer {
 	public static final String RMI_NAME = "bank.access.DataAccess";
@@ -21,7 +21,7 @@ public class DataAccessServer {
 			System.setSecurityManager(new SecurityManager());
         }
 
-        DataAccess db = new DataAccessMock();
+        DataAccess db = new DataAccessImpl();
 		try {
 			System.out.println("Exporting DataAccessMock object");
 			DataAccess dbstub = (DataAccess) UnicastRemoteObject.exportObject(db,0);

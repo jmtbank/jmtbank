@@ -8,6 +8,7 @@ import bank.Account;
 import bank.BankCard;
 import bank.Client;
 
+@Deprecated
 public class DataAccessMock implements DataAccess {
 	private Map<String,Account> accounts;
 	private Map<String,Client> clients;
