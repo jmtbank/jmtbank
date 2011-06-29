@@ -17,7 +17,7 @@ public class AuthenticatorTest {
 		if(args.length == 1) {
 			if(args[0].equals("l")) {
 				DataAccess db = new DataAccessMock();
-				auth = new Authenticator(db);
+				auth = new Authenticator(db,null);
 			}
 			else if(args[0].equals("r")) {
 				Remote remoteauth;
