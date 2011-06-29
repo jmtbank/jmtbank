@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import bank.Account;
 import bank.BankCard;
 import bank.Client;
+import bank.Bank;
 import bank.access.DataAccess;
 import bank.access.DataAccessException;
 import bank.interbanking.Interbank;
@@ -68,7 +69,7 @@ public class Authenticator implements Authentication {
 	public Client authenticateCDClient(String cardId, String PIN) throws RemoteException, AuthenticationException {
 		System.out.print("Authentication card " + cardId + ": ");
 		String bankcode = cardId.substring(0, BankCard.BANK_CODE_LENGTH);
-		if(bankcode.equals("001")) {
+		if(bankcode.equals(Bank.getBankCode())) {
 			try {
 				BankCard card = db.getBankCard(cardId);
 				Client cl = null;

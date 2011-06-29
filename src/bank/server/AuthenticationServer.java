@@ -19,6 +19,7 @@ import bank.access.DataAccessException;
 import bank.authentication.Authentication;
 import bank.authentication.Authenticator;
 import bank.interbanking.Interbank;
+import bank.Bank;
 
 public class AuthenticationServer {
 	public static final String RMI_NAME = "bank.authentication.Authentication";
@@ -63,8 +64,8 @@ public class AuthenticationServer {
 				InetAddress addr = InetAddress.getLocalHost();
 				String hostname = addr.getHostAddress();
 				System.out.println("Registering the Authenticator at InterBank");
-				ib.registerAuthenticator("001", hostname, 1099, RMI_NAME);
-				System.out.println("Registered as: "+ib.lookupAuthenticator("001"));
+				ib.registerAuthenticator(Bank.getBankCode(), hostname, 1099, RMI_NAME);
+				System.out.println("Registered as: "+ib.lookupAuthenticator(Bank.getBankCode()));
 			} catch (UnknownHostException e) { System.out.println("Error resolving host"); }
 			System.out.println("AuthenticationServer running.. (Press enter to stop)");
 			try {
@@ -76,7 +77,7 @@ public class AuthenticationServer {
 			System.out.println("Unbinding from the registry.");
 			try {
 				localRegistry.unbind(RMI_NAME);
-				ib.deregisterAuthenticator("001");
+				ib.deregisterAuthenticator(Bank.getBankCode());
 			} catch (NotBoundException e) {
 				System.err.println("Error unbinding from registry.");
 			}
