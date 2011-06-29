@@ -1,15 +1,12 @@
 package bank.authentication;
 
-import java.rmi.*;
 import java.rmi.Remote;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 
-import bank.Account;
 import bank.Client;
 import bank.access.DataAccess;
 import bank.access.DataAccessMock;
-import bank.access.DataAccessException;
 import bank.server.AuthenticationServer;
 
 public class AuthenticatorTest {

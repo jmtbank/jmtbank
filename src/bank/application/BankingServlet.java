@@ -1,19 +1,13 @@
 package bank.application;
 
 import java.io.*;
-import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
-import java.rmi.registry.LocateRegistry;
 
 import bank.authentication.AuthenticationException;
 import bank.authentication.AuthenticationMethod;
-import bank.banking.Transaction;
 import bank.banking.TransactionException;
-import bank.server.TransactionServer;
 import bank.Client;
 
 public class BankingServlet extends LoggedInServlet {

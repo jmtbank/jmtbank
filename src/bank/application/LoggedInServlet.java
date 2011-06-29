@@ -19,7 +19,6 @@ import bank.authentication.Authentication;
 import bank.authentication.AuthenticationException;
 import bank.Client;
 import bank.server.AuthenticationServer;
-import bank.authentication.AuthenticationMethod;
 import bank.banking.Transaction;
 import bank.server.TransactionServer;
 

@@ -1,10 +1,7 @@
 package bank.banking;
 
-import java.rmi.*;
-import bank.Account;
 import bank.access.DataAccess;
 import bank.access.DataAccessMock;
-import bank.access.DataAccessException;
 
 public class TransactorLocalTest {
 public static void main(String[] args) {

@@ -1,22 +1,16 @@
 package bank.application;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.Registry;
-import java.rmi.registry.LocateRegistry;
 
 import bank.authentication.AuthenticationException;
 import bank.authentication.AuthenticationMethod;
 import bank.Client;
-import bank.banking.Transaction;
 import bank.banking.TransactionException;
 
 public class AtmServlet extends LoggedInServlet {

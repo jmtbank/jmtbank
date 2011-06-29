@@ -1,9 +1,6 @@
 package bank.access;
 
 import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.Map;
-
 import bank.Account;
 import bank.BankCard;
 import bank.Client;
@@ -11,9 +8,6 @@ import bank.Client;
 import java.sql.*;
 
 public class DataAccessImpl implements DataAccess {
-	private Map<String,Account> accounts;
-	private Map<String,Client> clients;
-	private Map<String,BankCard> cards;
 	private Connection conn;
 	private String driver;
 	private String dbHost;
