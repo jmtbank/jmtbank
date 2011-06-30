@@ -62,7 +62,7 @@ public class BankingServlet extends LoggedInServlet {
 					request.setAttribute("balance", balance);
 				} catch (Exception tranex) { }
 			} else if("/logout".equals(path)) {
-				request.getSession().invalidate();
+				session.invalidate();
 				request.setAttribute("authMsg", new AuthenticationMessage("Logout successful"));
 				address = "";
 			} else {

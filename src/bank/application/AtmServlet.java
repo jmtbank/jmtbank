@@ -108,9 +108,9 @@ public class AtmServlet extends LoggedInServlet {
 					}
 				}
 			} else if("/logout".equals(path)) {
-				session.removeAttribute("authClient");
-				address = "/";
-				//response.sendRedirect("/");
+				session.invalidate();
+				request.setAttribute("authMsg", new AuthenticationMessage("Logout successful"));
+				address = "";
 			} else {
 				address = "/WEB-INF/atm/Menu.jsp";
 			}
