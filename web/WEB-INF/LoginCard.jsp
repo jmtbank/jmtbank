@@ -15,4 +15,5 @@ CardId: <input type="text" name="identifier"><br />
 Pin: <input type="password" name="secret"><br />
 <input type="submit" value="Login">
 </form>
+Back to <a href="../">menu</a>
 </BODY></HTML>
