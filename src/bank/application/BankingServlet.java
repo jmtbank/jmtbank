@@ -82,6 +82,7 @@ public class BankingServlet extends LoggedInServlet {
 			return cl;
 		}
 		catch(RemoteException re) { 
+			clear();
 			throw new AuthenticationException("Unable to authenticate: "+re.getMessage());
 		}
 	}

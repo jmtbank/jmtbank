@@ -126,7 +126,8 @@ public class AtmServlet extends LoggedInServlet {
 			session.setAttribute("loginmethod", AuthenticationMethod.CARD);
 			return cl;
 		}
-		catch(RemoteException re) { 
+		catch(RemoteException re) {
+			clear();
 			throw new AuthenticationException("Unable to authenticate: "+re.getMessage());
 		}
 	}

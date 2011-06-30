@@ -28,10 +28,13 @@ public abstract class LoggedInServlet extends HttpServlet {
 	protected Client authClient;
 	protected HttpSession session;
 	
-//	public LoggedInServlet() {
-//		super();
-//	}
-	
+	/**
+	 * Clear our RMI connections, so we can try to reconnect on the next request.
+	 */
+	public void clear() {
+		auth = null;
+		trans = null;
+	}
 	public void init() {
 		String authloc = getInitParameter("authenticationserver");
 		if(authloc == null)
@@ -66,6 +69,10 @@ public abstract class LoggedInServlet extends HttpServlet {
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
+		if(auth == null) {
+			//(re)connect to rmi objects
+			init();
+		}
 		session = request.getSession();
 		if(session.isNew()) {
 			session.setMaxInactiveInterval(60);
