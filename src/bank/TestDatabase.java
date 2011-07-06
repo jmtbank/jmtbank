@@ -24,6 +24,7 @@ public class TestDatabase {
 			//TODO
 		} catch(SQLException sqle) {
 			//TODO
+			sqle.printStackTrace();
 		}
 		
 		try { 

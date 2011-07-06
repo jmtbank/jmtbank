@@ -53,11 +53,11 @@ public class DataAccessImpl implements DataAccess {
 				conn.setAutoCommit(false);
 			} else { alreadyexists = true; }
 		} catch(ClassNotFoundException cnfe) {
-				//TODO
-				throw new RemoteException("cnfe");
+			cnfe.printStackTrace();
+			throw new RemoteException("cnfe " + cnfe.getMessage());
 		} catch(SQLException sqle) {
-				//TODO
-				throw new RemoteException("sqle");
+			sqle.printStackTrace();
+			throw new RemoteException("sqle " + sqle.getMessage());
 		}
 		
 		Account account = null;

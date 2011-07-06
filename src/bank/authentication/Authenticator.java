@@ -46,7 +46,7 @@ public class Authenticator implements Authentication {
 			throw new AuthenticationException(e.getMessage());
 		} catch (NullPointerException e) {
 			System.out.println("fail (nullpointer)");
-			e.printStackTrace();
+			//e.printStackTrace();
 			return null;
 		} catch (ConnectException e) {
 			System.out.println("fail (connectexception)");
@@ -97,17 +97,19 @@ public class Authenticator implements Authentication {
 			}
 		}
 		else {
+			System.out.println("Card " + cardId + " not a local card, trying to get a remote authenticator.");
 			String remoteAuthLoc = ib.lookupAuthenticator(bankcode);
+			System.out.println("Got remote auth location: " + remoteAuthLoc);
 			if(remoteAuthLoc != null) {
 				try {
 					Authentication remoteauth = (Authentication) Naming.lookup(remoteAuthLoc);
 					return remoteauth.authenticateCDClient(cardId, PIN);
-				} catch(RemoteException e) {
-					return null;
 				} catch(MalformedURLException e) {
-					return null;
+					e.printStackTrace();
+					throw new AuthenticationException("MalformedURL: " + e.getMessage());
 				} catch(NotBoundException e) {
-					return null;
+					e.printStackTrace();
+					throw new AuthenticationException("NotBound: " + e.getMessage());
 				}
 			} else throw new AuthenticationException("Could not resolve "+bankcode+" from interbank");
 		}

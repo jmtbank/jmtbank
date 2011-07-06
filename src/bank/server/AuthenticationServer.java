@@ -67,12 +67,12 @@ public class AuthenticationServer {
 	        try {
 				localRegistry.bind(RMI_NAME, authStub);
 			} catch (AlreadyBoundException e) {
-				System.err.println("WARNING: An other auth server is register in the registry, overwriting its binding.");
+				System.err.println("WARNING: An other auth server is registered in the registry, overwriting its binding.");
 				localRegistry.rebind(RMI_NAME, authStub);				
 			}
 			System.out.println("Registering the Authenticator at InterBank");
 			ib.registerAuthenticator(Bank.getBankCode(), hostname, 1099, RMI_NAME);
-			System.out.println("Registered as: "+ib.lookupAuthenticator(Bank.getBankCode()));
+			System.out.println("Registered as: bank " + Bank.getBankCode() + " at " +ib.lookupAuthenticator(Bank.getBankCode()));
 			System.out.println("AuthenticationServer running.. (Press enter to stop)");
 			try {
 				System.in.read();

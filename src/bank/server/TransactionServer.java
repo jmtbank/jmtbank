@@ -84,12 +84,12 @@ public class TransactionServer {
 	        try {
 				localRegistry.bind(RMI_TRANSACTION_NAME, transStub);
 			} catch (AlreadyBoundException e) {
-				System.err.println("WARNING: An other transaction server is register in the registry, overwriting its binding.");
+				System.err.println("WARNING: An other transaction server is registered in the registry, overwriting its binding.");
 				localRegistry.rebind(RMI_TRANSACTION_NAME, transStub);				
 			}
 
 			if(interbank != null) {
-				System.out.println("Registering with the Interbanking registy. bank " +Bank.getBankCode() + "rmi://"+hostname + "/" +RMI_TRANSACTIONPROCESSING_NAME);
+				System.out.println("Registering with the Interbanking registy as bank " +Bank.getBankCode() + " at rmi://"+hostname + "/" +RMI_TRANSACTIONPROCESSING_NAME);
 				interbank.registerTransactionProcessor(Bank.getBankCode(), hostname, RMI_TRANSACTIONPROCESSING_NAME);
 			}
 			

@@ -34,11 +34,15 @@ public class Transactor implements Transaction {
 	 */
 	public String transfer(String debitAccountId, String creditAccountId, float amount)
 		throws RemoteException, TransactionException {
+		System.out.println("Trying to transfer " + amount + " from " + debitAccountId + " to " + creditAccountId);
 		if(isLocal(creditAccountId) && isLocal(debitAccountId)) {
+			System.out.println("Doing a local transfer");
 			return local.transfer(debitAccountId, creditAccountId, amount);
-		} else if (isLocal(debitAccountId)){ 
+		} else if (isLocal(debitAccountId)){
+			System.out.println("Doing a remote transfer, requesting remote transProcessor");			
 			TransactionProcessing debitProc = local;
 			TransactionProcessing creditProc = getProcessor(creditAccountId);
+			System.out.println("got remote transProcessor: " + creditProc);
 			try {
 				debitProc.prepareDebit(debitAccountId, creditAccountId, amount);
 				creditProc.prepareCredit(creditAccountId, debitAccountId, amount);
