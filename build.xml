@@ -88,6 +88,9 @@
 	<target name="start_auth" depends="compile">
 		<java classname="bank.server.AuthenticationServer" classpath="${build.classes.dir}" fork="${start_forked}">
 			<jvmarg value="-Djava.security.policy=${policy.both}" />
+			<jvmarg value="-Djava.rmi.server.hostname=${external_address}" />
+			<arg value="localhost"/>       <!-- DataAccessServer location-->
+			<arg value="${external_address}"/>  <!-- external address exported to interbanking registry-->
 		</java>
 	</target>
 
@@ -95,6 +98,9 @@
 	<target name="start_trans" depends="compile">
 		<java classname="bank.server.TransactionServer" classpath="${build.classes.dir}" fork="${start_forked}">
 			<jvmarg value="-Djava.security.policy=${policy.both}" />
+			<jvmarg value="-Djava.rmi.server.hostname=${external_address}" />
+			<arg value="localhost"/>       <!-- DataAccessServer location-->
+			<arg value="${external_address}"/>  <!-- external address exported to interbanking registry-->
 		</java>
 	</target>
 </project>
