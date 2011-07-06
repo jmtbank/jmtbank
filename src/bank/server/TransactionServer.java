@@ -108,6 +108,7 @@ public class TransactionServer {
 			System.out.println("Unbinding from the registry.");
 			try {
 				localRegistry.unbind(RMI_TRANSACTIONPROCESSING_NAME);
+				localRegistry.unbind(RMI_TRANSACTION_NAME);
 			} catch (NotBoundException e) {
 				System.err.println("Error unbinding from registry.");
 			}
@@ -117,6 +118,12 @@ public class TransactionServer {
 				System.err.println("Error unexporting object, there might be pending calls on it, forcing in 5 seconds");
 				try { Thread.sleep(5*1000); } catch (InterruptedException e) {}
 				UnicastRemoteObject.unexportObject(trans, true);
+			}
+			System.out.println("Unexporting object.");
+			if(! UnicastRemoteObject.unexportObject(transProc, false)) {
+				System.err.println("Error unexporting object, there might be pending calls on it, forcing in 5 seconds");
+				try { Thread.sleep(5*1000); } catch (InterruptedException e) {}
+				UnicastRemoteObject.unexportObject(transProc, true);
 			}
 
 		} catch (NotBoundException e) {
