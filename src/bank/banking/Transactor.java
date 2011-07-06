@@ -46,9 +46,8 @@ public class Transactor implements Transaction {
 			try {
 				debitProc.prepareDebit(debitAccountId, creditAccountId, amount);
 				creditProc.prepareCredit(creditAccountId, debitAccountId, amount);
-				if(debitProc.getBalance(debitAccountId) < 0) { debitProc.rollback(); creditProc.rollback(); }
-				else { debitProc.commit(); creditProc.commit(); }
-				return null;
+				if(debitProc.getBalance(debitAccountId) < 0) { debitProc.rollback(); creditProc.rollback(); return "Insufficient funds"; }
+				else { debitProc.commit(); creditProc.commit(); return null; }
 			} catch(RemoteException re) { debitProc.rollback(); creditProc.rollback(); throw re; }
 			catch(TransactionException te) { debitProc.rollback(); creditProc.rollback(); throw te; }
 		} else {
